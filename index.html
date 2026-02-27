@@ -180,7 +180,7 @@ select.hw-f-input{
   background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6' fill='%23555577'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 10px center;
 }
-.hw-f-date{max-width:145px}
+.hw-f-date{flex:1;min-width:0;color-scheme:dark}
 .hw-f-pri{max-width:70px;text-align:center;font-family:'Space Mono',monospace;font-weight:700}
 .hw-add-submit{
   width:100%;padding:14px;border:none;border-radius:12px;
@@ -454,8 +454,13 @@ select.hw-f-input{
       </select>
     </div>
     <div class="hw-form-row">
-      <input class="hw-f-input hw-f-date" id="hw-f-due" type="date" placeholder="Due date">
-      <button class="hw-add-submit" id="hw-add-btn">ADD + 📅</button>
+      <div style="flex:1;position:relative">
+        <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:4px;letter-spacing:.5px;text-transform:uppercase">📅 Due Date</div>
+        <input class="hw-f-input hw-f-date" id="hw-f-due" type="date" style="width:100%">
+      </div>
+    </div>
+    <div class="hw-form-row">
+      <button class="hw-add-submit" id="hw-add-btn">ADD TO LIST + CALENDAR 📅</button>
     </div>
   </div>
 

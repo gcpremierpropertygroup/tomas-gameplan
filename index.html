@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a1a">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<title>TG — Game Plan</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a1a;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.07);--surface3:rgba(255,255,255,.10);
+  --neon:#00f0ff;--neon-glow:rgba(0,240,255,.15);--neon-soft:rgba(0,240,255,.08);
+  --fire:#ff4d4d;--fire-glow:rgba(255,77,77,.15);
+  --gold:#ffd000;--gold-glow:rgba(255,208,0,.12);
+  --mint:#00e88f;--mint-glow:rgba(0,232,143,.15);
+  --purple:#8b5cf6;--purple-glow:rgba(139,92,246,.12);
+  --text:#f0f0f8;--text2:#8888aa;--text3:#555577;
+  --border:rgba(255,255,255,.06);
+  --radius:16px;
+}
+html{height:100%}
+body{
+  font-family:'Outfit',system-ui,sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100%;padding:0 0 80px 0;overflow-x:hidden;
+}
+::selection{background:var(--neon);color:#000}
+input,textarea,select,button{font-family:inherit}
+
+body::before{content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse at 20% 0%,rgba(0,240,255,.06) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 100%,rgba(139,92,246,.05) 0%,transparent 50%);
+  pointer-events:none;z-index:0}
+
+.header{padding:56px 24px 16px;position:relative;z-index:1}
+.header-top{display:flex;align-items:center;gap:12px}
+.avatar{
+  width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(135deg,var(--neon),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;color:#000;
+  box-shadow:0 0 24px rgba(0,240,255,.2);position:relative;
+}
+.avatar::after{
+  content:'';position:absolute;inset:-2px;border-radius:16px;
+  background:linear-gradient(135deg,var(--neon),var(--purple));opacity:.3;
+  filter:blur(8px);z-index:-1;
+}
+.header h1{font-size:26px;font-weight:900;letter-spacing:-.5px;color:#fff;line-height:1.1}
+.header .sub{font-size:12px;font-weight:600;color:var(--text2);margin-top:2px}
+.header-meta{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.header .date{color:var(--text2);font-size:13px;font-weight:600}
+.day-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;
+  font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+}
+.day-badge.heavy{background:var(--fire-glow);color:var(--fire);border:1px solid rgba(255,77,77,.2)}
+.day-badge.light{background:var(--mint-glow);color:var(--mint);border:1px solid rgba(0,232,143,.2)}
+.day-badge .pulse{width:7px;height:7px;border-radius:50%;animation:pulse 1.8s ease infinite}
+.heavy .pulse{background:var(--fire)}
+.light .pulse{background:var(--mint)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+
+.xp-bar-wrap{margin-top:16px;position:relative}
+.xp-bar-bg{height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.xp-bar-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.4,0,.2,1);
+  background:linear-gradient(90deg,var(--neon),var(--purple));position:relative}
+.xp-bar-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 60%,rgba(255,255,255,.3) 80%,transparent 100%);
+  animation:xpShine 2s ease-in-out infinite;
+}
+@keyframes xpShine{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+.xp-labels{display:flex;justify-content:space-between;margin-top:6px}
+.xp-labels span{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--text3)}
+.xp-labels .xp-val{color:var(--neon)}
+
+.level-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;
+  background:var(--gold-glow);border:1px solid rgba(255,208,0,.2);
+  font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.5px;
+}
+.streak-wrap{
+  display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;
+  background:var(--fire-glow);border:1px solid rgba(255,77,77,.15);
+}
+.streak-num{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--fire)}
+.streak-label{font-size:10px;color:rgba(255,77,77,.7);font-weight:600}
+.streak-fire{font-size:14px;filter:saturate(1.5)}
+
+.tabs{display:flex;gap:4px;padding:6px 20px 16px;position:relative;z-index:1;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  padding:10px 18px;font-size:13px;font-weight:700;color:var(--text3);cursor:pointer;
+  border-radius:12px;background:transparent;border:1px solid transparent;white-space:nowrap;
+  transition:all .25s;flex-shrink:0;
+}
+.tab.active{color:var(--neon);background:var(--neon-soft);border-color:rgba(0,240,255,.15)}
+.tab:active{transform:scale(.94)}
+
+.page{display:none;padding:0 20px 24px;position:relative;z-index:1}
+.page.active{display:block;animation:fadeUp .35s cubic-bezier(.4,0,.2,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+.card{
+  background:var(--surface);border-radius:var(--radius);padding:22px;margin-bottom:16px;
+  border:1px solid var(--border);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.card-label{
+  font-size:11px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;
+  color:var(--text3);margin-bottom:18px;display:flex;align-items:center;gap:10px;
+}
+.card-label .badge{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px}
+.badge-neon{background:var(--neon-soft);color:var(--neon)}
+.badge-fire{background:var(--fire-glow);color:var(--fire)}
+.badge-gold{background:var(--gold-glow);color:var(--gold)}
+
+.big3-item{display:flex;align-items:center;gap:14px;padding:16px 0}
+.big3-item+.big3-item{border-top:1px solid var(--border)}
+.big3-rank{
+  width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace;font-weight:700;font-size:16px;flex-shrink:0;position:relative;overflow:hidden;
+}
+.big3-rank::before{content:'';position:absolute;inset:0;opacity:.15;border-radius:12px}
+.big3-rank.r1{color:var(--fire)}.big3-rank.r1::before{background:var(--fire)}
+.big3-rank.r2{color:var(--gold)}.big3-rank.r2::before{background:var(--gold)}
+.big3-rank.r3{color:var(--neon)}.big3-rank.r3::before{background:var(--neon)}
+.big3-input{
+  flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+  padding:14px 16px;color:var(--text);font-size:15px;font-weight:500;outline:none;transition:all .25s;
+}
+.big3-input:focus{border-color:var(--neon);box-shadow:0 0 0 3px var(--neon-soft)}
+.big3-input::placeholder{color:var(--text3);font-weight:400;font-size:14px}
+.check-btn{
+  width:38px;height:38px;border-radius:50%;border:2px solid rgba(255,255,255,.1);background:none;
+  cursor:pointer;flex-shrink:0;transition:all .25s;display:flex;align-items:center;justify-content:center;position:relative;
+}
+.check-btn:active{transform:scale(.8)}
+.check-btn.checked{
+  border-color:var(--mint);background:var(--mint);
+  box-shadow:0 0 20px rgba(0,232,143,.3);animation:checkPop .4s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes checkPop{0%{transform:scale(.6)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+.check-btn.checked::after{content:'✓';color:#000;font-size:18px;font-weight:900}
+
+.tl-item{display:flex;gap:14px;padding:14px 0;align-items:flex-start}
+.tl-item+.tl-item{border-top:1px solid var(--border)}
+.tl-time{
+  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
+  color:var(--neon);min-width:108px;padding-top:3px;flex-shrink:0;letter-spacing:.3px;
+}
+.tl-label{font-size:15px;font-weight:700;color:var(--text)}
+.tl-desc{font-size:12px;color:var(--text3);margin-top:4px;line-height:1.5;font-weight:500}
+
+/* ===== HW TRACKER STYLES ===== */
+.hw-stats{display:flex;gap:8px;margin-bottom:18px}
+.hw-stat{flex:1;text-align:center;padding:12px 8px;border-radius:14px;background:var(--surface2);border:1px solid var(--border)}
+.hw-stat-num{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;line-height:1}
+.hw-stat-label{font-size:10px;font-weight:700;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.hw-stat.overdue .hw-stat-num{color:var(--fire)}
+.hw-stat.pending .hw-stat-num{color:var(--gold)}
+.hw-stat.done .hw-stat-num{color:var(--mint)}
+
+.hw-add-form{background:var(--surface2);border-radius:14px;padding:16px;margin-bottom:18px;border:1px solid var(--border)}
+.hw-add-form:focus-within{border-color:rgba(0,240,255,.2);box-shadow:0 0 0 3px var(--neon-soft)}
+.hw-form-row{display:flex;gap:8px;margin-bottom:8px}
+.hw-form-row:last-child{margin-bottom:0}
+.hw-f-input{
+  background:var(--surface3);border:1px solid var(--border);border-radius:10px;
+  padding:12px;color:var(--text);font-size:14px;font-weight:500;outline:none;transition:all .25s;flex:1;min-width:0;
+}
+.hw-f-input:focus{border-color:var(--neon)}
+.hw-f-input::placeholder{color:var(--text3)}
+select.hw-f-input{
+  appearance:none;-webkit-appearance:none;padding-right:28px;
+  background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l5 6 5-6' fill='%23555577'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+}
+.hw-f-date{max-width:145px}
+.hw-f-pri{max-width:70px;text-align:center;font-family:'Space Mono',monospace;font-weight:700}
+.hw-add-submit{
+  width:100%;padding:14px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--neon),var(--purple));color:#000;
+  font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;
+  transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.hw-add-submit:active{transform:scale(.96);opacity:.9}
+
+.hw-filter-bar{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.hw-filter-bar::-webkit-scrollbar{display:none}
+.hw-filter{
+  padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;
+  border:1px solid var(--border);background:none;color:var(--text3);white-space:nowrap;
+  transition:all .2s;flex-shrink:0;
+}
+.hw-filter.active{color:var(--neon);background:var(--neon-soft);border-color:rgba(0,240,255,.15)}
+.hw-filter .count{font-family:'Space Mono',monospace;font-size:10px;margin-left:4px;opacity:.7}
+
+.hw-list-section{margin-bottom:12px}
+.hw-section-label{
+  font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  padding:8px 0 10px;display:flex;align-items:center;gap:8px;
+}
+.hw-section-label.overdue{color:var(--fire)}
+.hw-section-label.today{color:var(--gold)}
+.hw-section-label.upcoming{color:var(--text2)}
+.hw-section-label.completed{color:var(--mint)}
+.hw-section-label .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.hw-section-label.overdue .dot{background:var(--fire);box-shadow:0 0 8px var(--fire)}
+.hw-section-label.today .dot{background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.hw-section-label.upcoming .dot{background:var(--text2)}
+.hw-section-label.completed .dot{background:var(--mint);box-shadow:0 0 8px var(--mint)}
+
+.hw-item{
+  background:var(--surface2);border-radius:14px;padding:14px 16px;margin-bottom:8px;
+  border:1px solid var(--border);transition:all .25s;
+}
+.hw-item.overdue{border-left:3px solid var(--fire)}
+.hw-item.today{border-left:3px solid var(--gold)}
+.hw-item.is-done{opacity:.5}
+.hw-item-top{display:flex;align-items:center;gap:10px}
+.hw-item-check{
+  width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,.1);background:none;
+  cursor:pointer;flex-shrink:0;transition:all .25s;display:flex;align-items:center;justify-content:center;
+}
+.hw-item-check:active{transform:scale(.8)}
+.hw-item-check.checked{border-color:var(--mint);background:var(--mint);box-shadow:0 0 16px rgba(0,232,143,.25)}
+.hw-item-check.checked::after{content:'✓';color:#000;font-size:14px;font-weight:900}
+.hw-item-check.in-prog{border-color:var(--gold);background:var(--gold-glow)}
+.hw-item-check.in-prog::after{content:'◐';color:var(--gold);font-size:16px}
+.hw-item-info{flex:1;min-width:0}
+.hw-item-name{font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hw-item.is-done .hw-item-name{text-decoration:line-through;color:var(--text3)}
+.hw-item-meta{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap}
+.hw-tag{
+  font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.3px;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.hw-tag-subject{background:var(--purple-glow);color:var(--purple);border:1px solid rgba(139,92,246,.15)}
+.hw-tag-due{background:var(--surface3);color:var(--text2);border:1px solid var(--border)}
+.hw-tag-due.overdue{background:var(--fire-glow);color:var(--fire);border-color:rgba(255,77,77,.2)}
+.hw-tag-due.today{background:var(--gold-glow);color:var(--gold);border-color:rgba(255,208,0,.2)}
+.hw-tag-due.tomorrow{background:var(--neon-soft);color:var(--neon);border-color:rgba(0,240,255,.15)}
+.hw-tag-pri{font-family:'Space Mono',monospace}
+.hw-tag-pri.p1{background:var(--fire-glow);color:var(--fire);border:1px solid rgba(255,77,77,.15)}
+.hw-tag-pri.p2{background:var(--gold-glow);color:var(--gold);border:1px solid rgba(255,208,0,.15)}
+.hw-tag-pri.p3{background:var(--surface3);color:var(--text3);border:1px solid var(--border)}
+.hw-item-actions{display:flex;gap:6px;flex-shrink:0}
+.hw-action-btn{
+  width:32px;height:32px;border-radius:10px;border:none;background:none;
+  color:var(--text3);cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+.hw-action-btn:active{transform:scale(.85)}
+.hw-action-btn.cal{font-size:14px}
+.hw-action-btn.cal:hover{color:var(--neon);background:var(--neon-soft)}
+.hw-action-btn.del:hover{color:var(--fire);background:var(--fire-glow)}
+
+.hw-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px;font-weight:500}
+.hw-empty-icon{font-size:48px;margin-bottom:12px;display:block;opacity:.5}
+
+/* ===== END HW STYLES ===== */
+
+.score-week{display:grid;gap:8px}
+.score-day-row{display:grid;grid-template-columns:52px repeat(4,1fr) 44px;gap:6px;align-items:center}
+.score-cat-header{font-size:9px;font-weight:800;color:var(--text3);text-align:center;letter-spacing:.5px;text-transform:uppercase;padding:2px 0}
+.score-day-label{font-size:13px;font-weight:700;color:var(--text2)}
+.score-day-label.is-today{color:var(--neon)}
+.score-toggle{
+  width:100%;aspect-ratio:1;max-width:44px;margin:0 auto;border-radius:12px;
+  border:2px solid rgba(255,255,255,.06);background:var(--surface2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .25s;font-size:16px;
+}
+.score-toggle:active{transform:scale(.8)}
+.score-toggle.yes{border-color:var(--mint);background:rgba(0,232,143,.1);box-shadow:0 0 12px rgba(0,232,143,.15)}
+.score-toggle.yes::after{content:'✓';color:var(--mint);font-weight:900;font-size:16px}
+.score-day-pts{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;text-align:center}
+.score-day-pts.high{color:var(--mint)}
+.score-day-pts.mid{color:var(--gold)}
+.score-day-pts.low{color:var(--text3)}
+
+.total-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface2);border-radius:16px;padding:20px;margin-top:18px;border:1px solid var(--border);
+}
+.total-label{font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase}
+.total-num{font-family:'Space Mono',monospace;font-size:36px;font-weight:700;line-height:1}
+.total-num.good{color:var(--mint);text-shadow:0 0 24px rgba(0,232,143,.3)}
+.total-num.mid{color:var(--gold);text-shadow:0 0 24px rgba(255,208,0,.2)}
+.total-num.bad{color:var(--fire);text-shadow:0 0 24px rgba(255,77,77,.2)}
+.total-num span{font-size:16px;color:var(--text3);font-weight:700}
+
+.reward-track{margin-top:18px;padding:18px 20px;background:var(--surface2);border-radius:16px;border:1px solid var(--border)}
+.reward-bar-bg{height:10px;background:rgba(255,255,255,.04);border-radius:5px;overflow:hidden;position:relative}
+.reward-bar-fill{height:100%;border-radius:5px;transition:width .6s cubic-bezier(.4,0,.2,1);position:relative}
+.reward-bar-fill.low{background:linear-gradient(90deg,var(--fire),#ff6b3d)}
+.reward-bar-fill.mid{background:linear-gradient(90deg,var(--fire),var(--gold))}
+.reward-bar-fill.high{background:linear-gradient(90deg,var(--gold),var(--mint))}
+.reward-bar-fill.max{background:linear-gradient(90deg,var(--mint),var(--neon))}
+.reward-bar-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 60%,rgba(255,255,255,.25) 80%,transparent 100%);
+  animation:xpShine 2.5s ease-in-out infinite;
+}
+.reward-markers{display:flex;justify-content:space-between;margin-top:8px;position:relative}
+.reward-marker{text-align:center}
+.reward-marker .num{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--text3)}
+.reward-marker .label{font-size:9px;font-weight:700;color:var(--text3);margin-top:2px;letter-spacing:.3px}
+.reward-marker.active .num{color:var(--mint)}
+.reward-marker.active .label{color:var(--mint)}
+.reward-marker.danger .num{color:var(--fire)}
+.reward-marker.danger .label{color:var(--fire)}
+.reset-link{display:block;text-align:center;margin-top:16px;font-size:12px;color:var(--text3);cursor:pointer;transition:color .2s;font-weight:600}
+.reset-link:hover{color:var(--fire)}
+
+.ci-q{margin-bottom:20px}
+.ci-q label{display:block;font-size:14px;font-weight:700;color:var(--text);margin-bottom:8px}
+.ci-q label span{color:var(--text3);font-weight:500;font-size:12px}
+.ci-textarea{
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:14px;
+  padding:16px;color:var(--text);font-size:14px;font-weight:500;line-height:1.6;
+  min-height:88px;outline:none;resize:vertical;transition:all .25s;
+}
+.ci-textarea:focus{border-color:var(--neon);box-shadow:0 0 0 3px var(--neon-soft)}
+.ci-textarea::placeholder{color:var(--text3);font-weight:400}
+.save-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:18px;
+  background:linear-gradient(135deg,var(--neon),var(--purple));border:none;border-radius:14px;
+  color:#000;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.5px;
+  transition:all .25s;text-transform:uppercase;box-shadow:0 0 24px rgba(0,240,255,.2);
+}
+.save-btn:active{transform:scale(.96);opacity:.9}
+
+.nav{
+  position:fixed;bottom:0;left:0;right:0;display:flex;
+  background:rgba(10,10,26,.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid var(--border);z-index:100;padding:6px 8px;
+  padding-bottom:max(6px,env(safe-area-inset-bottom));
+}
+.nav-btn{
+  flex:1;padding:8px 0;text-align:center;cursor:pointer;color:var(--text3);
+  font-size:10px;font-weight:700;transition:all .25s;border-radius:12px;
+  letter-spacing:.3px;display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.nav-btn.active{color:var(--neon)}
+.nav-btn .icon{font-size:22px;display:block;line-height:1}
+.nav-btn.active .icon{filter:drop-shadow(0 0 8px rgba(0,240,255,.4))}
+
+.toast{
+  position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-30px);
+  background:var(--mint);color:#000;padding:12px 32px;border-radius:14px;
+  font-size:14px;font-weight:800;opacity:0;transition:all .35s cubic-bezier(.4,0,.2,1);
+  z-index:200;pointer-events:none;box-shadow:0 8px 32px rgba(0,232,143,.3);letter-spacing:.3px;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.motiv-flash{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.5);
+  font-family:'Space Mono',monospace;font-size:28px;font-weight:700;
+  color:var(--neon);text-shadow:0 0 40px rgba(0,240,255,.5);
+  opacity:0;pointer-events:none;z-index:300;
+  transition:all .5s cubic-bezier(.175,.885,.32,1.275);white-space:nowrap;
+}
+.motiv-flash.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.motiv-flash.hide{opacity:0;transform:translate(-50%,-60%) scale(1.2)}
+
+@keyframes overdueGlow{0%,100%{box-shadow:0 0 0 rgba(255,77,77,0)}50%{box-shadow:0 0 12px rgba(255,77,77,.2)}}
+.hw-item.overdue{animation:overdueGlow 2.5s ease infinite}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="avatar">TG</div>
+    <div>
+      <h1>Game Plan</h1>
+      <div class="sub" id="today-date"></div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div class="day-badge" id="day-badge"><span class="pulse"></span><span id="day-label"></span></div>
+    <div class="level-badge" id="level-badge">⭐ LVL 1</div>
+    <div class="streak-wrap" id="streak-wrap" style="display:none">
+      <span class="streak-fire">🔥</span>
+      <span class="streak-num" id="streak-num">0</span>
+      <span class="streak-label">day streak</span>
+    </div>
+  </div>
+  <div class="xp-bar-wrap">
+    <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-fill" style="width:0%"></div></div>
+    <div class="xp-labels"><span class="xp-val" id="xp-text">0 XP</span><span class="xp-goal" id="xp-goal">Next: LVL 2</span></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-page="plan">⚡ Today</button>
+  <button class="tab" data-page="homework">📋 HW</button>
+  <button class="tab" data-page="score">🏆 Score</button>
+  <button class="tab" data-page="checkin">💬 Check-In</button>
+</div>
+
+<div class="page active" id="plan">
+  <div class="card">
+    <div class="card-label">🎯 The Big 3 <span class="badge badge-neon" id="big3-count">0 / 3</span></div>
+    <div class="big3-item">
+      <div class="big3-rank r1">1</div>
+      <input class="big3-input" id="b3-1" placeholder="If I only do ONE thing today...">
+      <button class="check-btn" id="b3c-1"></button>
+    </div>
+    <div class="big3-item">
+      <div class="big3-rank r2">2</div>
+      <input class="big3-input" id="b3-2" placeholder="Second priority">
+      <button class="check-btn" id="b3c-2"></button>
+    </div>
+    <div class="big3-item">
+      <div class="big3-rank r3">3</div>
+      <input class="big3-input" id="b3-3" placeholder="Third priority">
+      <button class="check-btn" id="b3c-3"></button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-label" id="sched-label">⏰ Schedule</div>
+    <div id="timeline"></div>
+  </div>
+</div>
+
+<div class="page" id="homework">
+  <!-- Stats Banner -->
+  <div class="hw-stats">
+    <div class="hw-stat overdue"><div class="hw-stat-num" id="hw-overdue-n">0</div><div class="hw-stat-label">Overdue</div></div>
+    <div class="hw-stat pending"><div class="hw-stat-num" id="hw-pending-n">0</div><div class="hw-stat-label">Pending</div></div>
+    <div class="hw-stat done"><div class="hw-stat-num" id="hw-done-n">0</div><div class="hw-stat-label">Done</div></div>
+  </div>
+
+  <!-- Add Form -->
+  <div class="card" style="padding:18px">
+    <div class="card-label">➕ Add Assignment</div>
+    <div class="hw-form-row">
+      <input class="hw-f-input" id="hw-f-name" placeholder="Assignment name">
+    </div>
+    <div class="hw-form-row">
+      <select class="hw-f-input" id="hw-f-subject">
+        <option value="">Subject</option>
+        <option>Math</option><option>Science</option><option>English</option>
+        <option>History</option><option>Spanish</option><option>PE</option><option>Other</option>
+      </select>
+      <select class="hw-f-input hw-f-pri" id="hw-f-pri">
+        <option value="">Pri</option><option value="1">🔴 1</option><option value="2">🟡 2</option><option value="3">⚪ 3</option>
+      </select>
+    </div>
+    <div class="hw-form-row">
+      <input class="hw-f-input hw-f-date" id="hw-f-due" type="date" placeholder="Due date">
+      <button class="hw-add-submit" id="hw-add-btn">ADD + 📅</button>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="hw-filter-bar">
+    <button class="hw-filter active" data-filter="all">All <span class="count" id="hw-all-c"></span></button>
+    <button class="hw-filter" data-filter="todo">To Do <span class="count" id="hw-todo-c"></span></button>
+    <button class="hw-filter" data-filter="doing">Doing <span class="count" id="hw-doing-c"></span></button>
+    <button class="hw-filter" data-filter="done">Done <span class="count" id="hw-done-c"></span></button>
+  </div>
+
+  <!-- Homework List -->
+  <div id="hw-list-container"></div>
+</div>
+
+<div class="page" id="score">
+  <div class="card">
+    <div class="card-label">🏆 This Week</div>
+    <div class="score-week">
+      <div class="score-day-row">
+        <div></div>
+        <div class="score-cat-header">Big 3</div>
+        <div class="score-cat-header">Power</div>
+        <div class="score-cat-header">Phone</div>
+        <div class="score-cat-header">HW</div>
+        <div class="score-cat-header">Pts</div>
+      </div>
+      <div id="score-rows"></div>
+    </div>
+    <div class="total-bar">
+      <div class="total-label">Weekly Total</div>
+      <div class="total-num" id="week-total">0<span> / 28</span></div>
+    </div>
+    <div class="reward-track">
+      <div class="reward-bar-bg"><div class="reward-bar-fill" id="reward-fill" style="width:0%"></div></div>
+      <div class="reward-markers">
+        <div class="reward-marker danger"><div class="num">0</div><div class="label">⚠️</div></div>
+        <div class="reward-marker" id="rm-15"><div class="num">15</div><div class="label">Min</div></div>
+        <div class="reward-marker" id="rm-20"><div class="num">20</div><div class="label">🎮 Reward</div></div>
+        <div class="reward-marker" id="rm-25"><div class="num">25</div><div class="label">🏆 Elite</div></div>
+        <div class="reward-marker"><div class="num">28</div><div class="label">👑 Perfect</div></div>
+      </div>
+    </div>
+    <a class="reset-link" id="reset-week">Reset this week</a>
+  </div>
+</div>
+
+<div class="page" id="checkin">
+  <div class="card">
+    <div class="card-label">💬 Sunday Check-In</div>
+    <div style="color:var(--text3);font-size:13px;margin-bottom:22px;font-weight:500;line-height:1.6">15 min. Honest answers. No judgment. Level up next week.</div>
+    <div class="ci-q">
+      <label>1. What went well? <span>Name a win.</span></label>
+      <textarea class="ci-textarea" id="ci-1" placeholder="Even small ones count."></textarea>
+    </div>
+    <div class="ci-q">
+      <label>2. Where did I get stuck? <span>Diagnose it.</span></label>
+      <textarea class="ci-textarea" id="ci-2" placeholder="Subject? Day? Phone? Tired after tennis?"></textarea>
+    </div>
+    <div class="ci-q">
+      <label>3. Biggest thing next week? <span>What's coming.</span></label>
+      <textarea class="ci-textarea" id="ci-3" placeholder="Test? Project? Big match?"></textarea>
+    </div>
+    <div class="ci-q">
+      <label>4. One thing I'll change: <span>Just one.</span></label>
+      <textarea class="ci-textarea" id="ci-4" placeholder="'Start Power Hour at 6:30 instead of 6:45'"></textarea>
+    </div>
+    <button class="save-btn" id="save-ci">SAVE CHECK-IN ✓</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Saved</div>
+<div class="motiv-flash" id="motiv"></div>
+
+<div class="nav">
+  <div class="nav-btn active" data-page="plan"><span class="icon">⚡</span>Today</div>
+  <div class="nav-btn" data-page="homework"><span class="icon">📋</span>HW</div>
+  <div class="nav-btn" data-page="score"><span class="icon">🏆</span>Score</div>
+  <div class="nav-btn" data-page="checkin"><span class="icon">💬</span>Check</div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const CATS=['big3','power','phone','hwin'];
+const now=new Date(),dayNum=now.getDay(),isHeavy=[1,2,3,4].includes(dayNum);
+
+const HYPE=['LOCKED IN 🔒','LET\'S GO 🚀','BEAST MODE 🐺','ON FIRE 🔥','UNSTOPPABLE ⚡','CLUTCH 🎯'];
+function flashMotiv(){
+  const m=$('#motiv');m.textContent=HYPE[Math.floor(Math.random()*HYPE.length)];
+  m.className='motiv-flash show';
+  setTimeout(()=>{m.className='motiv-flash hide'},1200);
+  setTimeout(()=>{m.className='motiv-flash'},1700);
+}
+
+$('#today-date').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+$('#day-badge').classList.add(isHeavy?'heavy':'light');
+$('#day-label').textContent=isHeavy?'HEAVY DAY':'LIGHT DAY';
+
+const S={
+  heavy:[
+    {t:'3:30 – 6:00',l:'🎾 Tennis',d:'Your commitment. Non-negotiable.'},
+    {t:'6:00 – 6:30',l:'Decompress & Eat',d:'No homework yet — recharge first.'},
+    {t:'6:25',l:'📋 Brain Dump',d:'2 min. Everything due. Tag 1-2-3.'},
+    {t:'6:30 – 7:30',l:'⚡ Power Hour',d:'Hardest first. Phone gone. 25/5 splits.'},
+    {t:'7:30 – 7:45',l:'Break',d:'Phone time earned.'},
+    {t:'7:45 – 8:30',l:'📚 Finish Block',d:'Remaining HW, review, prep tomorrow.'},
+    {t:'8:30 – 9:30',l:'Free Time',d:'Phone, games — you earned it.'},
+    {t:'9:30',l:'📱 Phone Out',d:'Charges outside your room.'},
+    {t:'10:00',l:'Lights Out',d:''}
+  ],
+  fri:[
+    {t:'After School',l:'🎉 Freedom',d:'But first — list weekend HW. 5 min.'},
+    {t:'Evening',l:'Your Call',d:'You earned the week.'},
+    {t:'9:30',l:'📱 Phone Out',d:'Even Fridays.'}
+  ],
+  sat:[
+    {t:'Morning',l:'Free',d:'Sleep in. Your time.'},
+    {t:'1:00 – 3:00',l:'📚 Weekend Work Block',d:'Phone-free. Knock it out.'},
+    {t:'After 3:00',l:'Free',d:'Rest of the day is yours.'}
+  ],
+  sun:[
+    {t:'Daytime',l:'Free',d:'Recharge.'},
+    {t:'After Dinner',l:'30-Min Review',d:'Prep backpack. Check planner.'},
+    {t:'7:00 PM',l:'💬 Check-In with Dad',d:'15 min. The 4 questions.'},
+    {t:'9:30',l:'📱 Phone Out',d:''}
+  ]
+};
+const sched=dayNum>=1&&dayNum<=4?S.heavy:dayNum===5?S.fri:dayNum===6?S.sat:S.sun;
+$('#sched-label').innerHTML='⏰ '+(isHeavy?'Heavy':'Light')+' Day Schedule';
+const tl=$('#timeline');
+sched.forEach(s=>{const d=document.createElement('div');d.className='tl-item';
+d.innerHTML=`<div class="tl-time">${s.t}</div><div><div class="tl-label">${s.l}</div>${s.d?`<div class="tl-desc">${s.d}</div>`:''}</div>`;tl.appendChild(d)});
+
+function showPage(id){$$('.page').forEach(p=>p.classList.remove('active'));$$('.tab,.nav-btn').forEach(t=>t.classList.remove('active'));
+document.getElementById(id).classList.add('active');$$(`[data-page="${id}"]`).forEach(t=>t.classList.add('active'))}
+$$('.tab,.nav-btn').forEach(t=>t.addEventListener('click',()=>showPage(t.dataset.page)));
+
+function save(k,v){try{localStorage.setItem('tg_'+k,JSON.stringify(v))}catch(e){}}
+function load(k,d){try{const v=localStorage.getItem('tg_'+k);return v?JSON.parse(v):d}catch(e){return d}}
+function toast(m){const t=$('#toast');t.textContent=m||'Saved ✓';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+function weekKey(){const d=new Date(),day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1);return new Date(d.setDate(diff)).toISOString().slice(0,10)}
+const todayKey=new Date().toISOString().slice(0,10),wk=weekKey();
+
+/* XP System */
+const XP_PER_CHECK=15, XP_PER_HW_DONE=10, XP_PER_SCORE=20;
+const LEVELS=[0,100,250,500,800,1200,1800,2500,3500,5000];
+const LEVEL_NAMES=['Rookie','Grinder','Focused','Locked In','Machine','Elite','Beast','Legend','GOAT','Transcendent'];
+
+function addXP(amount){let xp=load('xp_total',0);xp+=amount;save('xp_total',xp);updateXPBar(xp)}
+function getLevel(xp){let lvl=0;for(let i=LEVELS.length-1;i>=0;i--){if(xp>=LEVELS[i]){lvl=i;break}}return lvl}
+function updateXPBar(xp){
+  if(xp===undefined)xp=load('xp_total',0);
+  const lvl=getLevel(xp);const curr=LEVELS[lvl];const next=LEVELS[lvl+1]||LEVELS[lvl]+1000;
+  const pct=Math.min(100,Math.round((xp-curr)/(next-curr)*100));
+  $('#xp-fill').style.width=pct+'%';
+  $('#xp-text').textContent=xp+' XP';
+  $('#xp-goal').textContent=lvl<LEVELS.length-1?'Next: LVL '+(lvl+2):'MAX LEVEL';
+  $('#level-badge').innerHTML='⭐ LVL '+(lvl+1)+' — '+LEVEL_NAMES[lvl];
+}
+
+function updateStreak(){
+  const streak=load('streak',{count:0,lastDate:''});
+  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);const yKey=yesterday.toISOString().slice(0,10);
+  if(streak.lastDate===todayKey||streak.lastDate===yKey){
+    if(streak.count>0){$('#streak-wrap').style.display='flex';$('#streak-num').textContent=streak.count}
+  } else if(streak.lastDate&&streak.lastDate!==yKey&&streak.lastDate!==todayKey){
+    streak.count=0;save('streak',streak);
+  }
+}
+function bumpStreak(){
+  const streak=load('streak',{count:0,lastDate:''});
+  if(streak.lastDate!==todayKey){streak.count++;streak.lastDate=todayKey;save('streak',streak);
+  $('#streak-wrap').style.display='flex';$('#streak-num').textContent=streak.count}
+}
+updateXPBar();updateStreak();
+
+/* Big 3 */
+const big3=load('big3_'+todayKey,{items:['','',''],checks:[false,false,false]});
+function updateB3(){
+  const done=big3.checks.filter(Boolean).length;
+  $('#big3-count').textContent=done+' / 3';
+  $('#big3-count').className='badge '+(done===3?'badge-gold':'badge-neon');
+}
+for(let i=1;i<=3;i++){
+  const inp=$(`#b3-${i}`),btn=$(`#b3c-${i}`);inp.value=big3.items[i-1];
+  if(big3.checks[i-1])btn.classList.add('checked');
+  inp.addEventListener('input',()=>{big3.items[i-1]=inp.value;save('big3_'+todayKey,big3)});
+  btn.addEventListener('click',()=>{
+    const was=big3.checks[i-1];big3.checks[i-1]=!was;btn.classList.toggle('checked');
+    save('big3_'+todayKey,big3);updateB3();
+    if(!was){addXP(XP_PER_CHECK);flashMotiv();bumpStreak()}
+  });
+}
+updateB3();
+
+/* ===== HOMEWORK TRACKER ===== */
+let hwData=load('hw_all',[]);
+let hwFilter='all';
+
+function hwDateClass(due){
+  if(!due)return '';
+  const t=new Date(todayKey+'T00:00:00'),d=new Date(due+'T00:00:00');
+  const diff=Math.round((d-t)/(86400000));
+  if(diff<0)return 'overdue';
+  if(diff===0)return 'today';
+  if(diff===1)return 'tomorrow';
+  return 'upcoming';
+}
+function hwDateLabel(due){
+  if(!due)return '';
+  const t=new Date(todayKey+'T00:00:00'),d=new Date(due+'T00:00:00');
+  const diff=Math.round((d-t)/(86400000));
+  if(diff<0)return Math.abs(diff)+' day'+(Math.abs(diff)>1?'s':'')+' overdue';
+  if(diff===0)return 'Due today';
+  if(diff===1)return 'Due tomorrow';
+  return 'Due '+d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+
+function openCalendar(hw){
+  const title=encodeURIComponent((hw.subject?hw.subject+': ':'')+hw.name);
+  const details=encodeURIComponent('Priority: '+(hw.pri||'—')+'\nAdded from TG Game Plan');
+  if(!hw.due){toast('Set a due date first');return}
+  const d=hw.due.replace(/-/g,'');
+  // All-day event on due date, triggers default reminders (usually day before)
+  const url='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+title+'&dates='+d+'/'+d+'&details='+details+'&trp=false';
+  window.open(url,'_blank');
+}
+
+function updateHWStats(){
+  let overdue=0,pending=0,done=0;
+  hwData.forEach(h=>{
+    if(h.status==='done'){done++;return}
+    const cls=hwDateClass(h.due);
+    if(cls==='overdue')overdue++;
+    pending++;
+  });
+  $('#hw-overdue-n').textContent=overdue;
+  $('#hw-pending-n').textContent=pending;
+  $('#hw-done-n').textContent=done;
+  // filter counts
+  const all=hwData.length;
+  const todo=hwData.filter(h=>!h.status||h.status==='not-started').length;
+  const doing=hwData.filter(h=>h.status==='in-progress').length;
+  const doneC=hwData.filter(h=>h.status==='done').length;
+  $('#hw-all-c').textContent=all;$('#hw-todo-c').textContent=todo;
+  $('#hw-doing-c').textContent=doing;$('#hw-done-c').textContent=doneC;
+}
+
+function renderHW(){
+  const container=$('#hw-list-container');container.innerHTML='';
+  updateHWStats();
+
+  // Filter
+  let items=hwData.map((h,i)=>({...h,idx:i}));
+  if(hwFilter==='todo')items=items.filter(h=>!h.status||h.status==='not-started');
+  else if(hwFilter==='doing')items=items.filter(h=>h.status==='in-progress');
+  else if(hwFilter==='done')items=items.filter(h=>h.status==='done');
+
+  if(items.length===0){
+    container.innerHTML=`<div class="hw-empty"><span class="hw-empty-icon">${hwFilter==='done'?'🏆':'📋'}</span>${hwFilter==='done'?'No completed assignments yet':'No assignments — add one above!'}</div>`;
+    return;
+  }
+
+  // Sort: overdue first, then today, then by date ascending, done at bottom
+  items.sort((a,b)=>{
+    const aD=a.status==='done'?1:0, bD=b.status==='done'?1:0;
+    if(aD!==bD)return aD-bD;
+    const aP=a.pri||9,bP=b.pri||9;
+    const aDate=a.due||'9999',bDate=b.due||'9999';
+    if(aDate!==bDate)return aDate.localeCompare(bDate);
+    return aP-bP;
+  });
+
+  // Group by section
+  const sections={overdue:[],today:[],upcoming:[],noduedate:[],completed:[]};
+  items.forEach(h=>{
+    if(h.status==='done'){sections.completed.push(h);return}
+    const cls=hwDateClass(h.due);
+    if(cls==='overdue')sections.overdue.push(h);
+    else if(cls==='today')sections.today.push(h);
+    else if(!h.due)sections.noduedate.push(h);
+    else sections.upcoming.push(h);
+  });
+
+  function renderSection(label,cssClass,items){
+    if(items.length===0)return;
+    const sec=document.createElement('div');sec.className='hw-list-section';
+    sec.innerHTML=`<div class="hw-section-label ${cssClass}"><span class="dot"></span>${label}</div>`;
+    items.forEach(h=>{
+      const el=document.createElement('div');
+      const isDone=h.status==='done';
+      const isInProg=h.status==='in-progress';
+      const dueClass=hwDateClass(h.due);
+      el.className='hw-item'+(isDone?' is-done':'')+(dueClass==='overdue'&&!isDone?' overdue':'')+(dueClass==='today'&&!isDone?' today':'');
+      el.innerHTML=`
+        <div class="hw-item-top">
+          <button class="hw-item-check${isDone?' checked':''}${isInProg?' in-prog':''}" data-idx="${h.idx}"></button>
+          <div class="hw-item-info">
+            <div class="hw-item-name">${esc(h.name||'Untitled')}</div>
+            <div class="hw-item-meta">
+              ${h.subject?`<span class="hw-tag hw-tag-subject">${h.subject}</span>`:''}
+              ${h.due?`<span class="hw-tag hw-tag-due ${dueClass}">${hwDateLabel(h.due)}</span>`:''}
+              ${h.pri?`<span class="hw-tag hw-tag-pri p${h.pri}">P${h.pri}</span>`:''}
+            </div>
+          </div>
+          <div class="hw-item-actions">
+            ${h.due&&!isDone?`<button class="hw-action-btn cal" data-idx="${h.idx}" title="Add to Calendar">📅</button>`:''}
+            <button class="hw-action-btn del" data-idx="${h.idx}" title="Delete">×</button>
+          </div>
+        </div>`;
+      sec.appendChild(el);
+    });
+    container.appendChild(sec);
+  }
+  renderSection('🔴 OVERDUE','overdue',sections.overdue);
+  renderSection('🟡 DUE TODAY','today',sections.today);
+  renderSection('📅 UPCOMING','upcoming',sections.upcoming);
+  if(sections.noduedate.length)renderSection('📌 NO DUE DATE','upcoming',sections.noduedate);
+  renderSection('✅ COMPLETED','completed',sections.completed);
+
+  // Event listeners
+  container.querySelectorAll('.hw-item-check').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const i=parseInt(btn.dataset.idx);
+      const states=['not-started','in-progress','done'];
+      const cur=hwData[i].status||'not-started';
+      const next=states[(states.indexOf(cur)+1)%3];
+      const wasDone=cur==='done';
+      hwData[i].status=next;
+      save('hw_all',hwData);renderHW();
+      if(next==='done'&&!wasDone){addXP(XP_PER_HW_DONE);flashMotiv();bumpStreak();toast('Assignment done! +10 XP')}
+    });
+  });
+  container.querySelectorAll('.hw-action-btn.cal').forEach(btn=>{
+    btn.addEventListener('click',()=>openCalendar(hwData[parseInt(btn.dataset.idx)]));
+  });
+  container.querySelectorAll('.hw-action-btn.del').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      hwData.splice(parseInt(btn.dataset.idx),1);
+      save('hw_all',hwData);renderHW();toast('Removed');
+    });
+  });
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// Add HW button
+$('#hw-add-btn').addEventListener('click',()=>{
+  const name=$('#hw-f-name').value.trim();
+  if(!name){toast('Enter assignment name');$('#hw-f-name').focus();return}
+  const hw={
+    name:name,
+    subject:$('#hw-f-subject').value,
+    due:$('#hw-f-due').value,
+    pri:$('#hw-f-pri').value,
+    status:'not-started',
+    added:todayKey
+  };
+  hwData.push(hw);
+  save('hw_all',hwData);
+  // Clear form
+  $('#hw-f-name').value='';$('#hw-f-subject').value='';$('#hw-f-due').value='';$('#hw-f-pri').value='';
+  renderHW();
+  addXP(5);toast('Added! +5 XP');
+  // Auto-open calendar if due date set
+  if(hw.due){
+    setTimeout(()=>openCalendar(hw),400);
+  }
+});
+
+// Filter buttons
+$$('.hw-filter').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    $$('.hw-filter').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');hwFilter=btn.dataset.filter;renderHW();
+  });
+});
+
+renderHW();
+
+/* Scoreboard */
+let scores=load('scores_'+wk,{});
+function renderScores(){const c=$('#score-rows');c.innerHTML='';let total=0;
+const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],nums=[1,2,3,4,5,6,0];
+days.forEach((day,di)=>{const row=document.createElement('div');row.className='score-day-row';
+const isToday=nums[di]===now.getDay();
+const lbl=document.createElement('div');lbl.className='score-day-label'+(isToday?' is-today':'');lbl.textContent=isToday?'→ '+day:day;row.appendChild(lbl);
+let dp=0;CATS.forEach(cat=>{const cell=document.createElement('div');cell.style.display='flex';cell.style.justifyContent='center';
+const key=day+'_'+cat,on=scores[key]||false;
+const btn=document.createElement('button');btn.className='score-toggle'+(on?' yes':'');
+btn.addEventListener('click',()=>{const was=scores[key];scores[key]=!was;save('scores_'+wk,scores);renderScores();if(!was){addXP(XP_PER_SCORE);bumpStreak()}});
+cell.appendChild(btn);row.appendChild(cell);if(on)dp++});
+const pts=document.createElement('div');pts.className='score-day-pts '+(dp>=3?'high':dp>=2?'mid':'low');pts.textContent=dp;row.appendChild(pts);
+c.appendChild(row);total+=dp});
+const te=$('#week-total');te.innerHTML=total+'<span> / 28</span>';te.className='total-num '+(total>=20?'good':total>=15?'mid':'bad');
+const pct=Math.min(100,Math.round(total/28*100));const fill=$('#reward-fill');fill.style.width=pct+'%';
+fill.className='reward-bar-fill '+(total>=25?'max':total>=20?'high':total>=15?'mid':'low');
+if(total>=20)$('#rm-20').classList.add('active');else $('#rm-20').classList.remove('active');
+if(total>=25)$('#rm-25').classList.add('active');else $('#rm-25').classList.remove('active');
+if(total<15)$('#rm-15').classList.add('danger');else $('#rm-15').classList.remove('danger');
+}
+renderScores();
+$('#reset-week').addEventListener('click',()=>{if(confirm('Reset scores?')){scores={};save('scores_'+wk,scores);renderScores();toast('Reset')}});
+
+/* Check-in */
+const ci=load('ci_'+wk,{});
+for(let i=1;i<=4;i++){const ta=$(`#ci-${i}`);ta.value=ci['q'+i]||'';ta.addEventListener('input',()=>{ci['q'+i]=ta.value;save('ci_'+wk,ci)})}
+$('#save-ci').addEventListener('click',()=>{save('ci_'+wk,ci);addXP(50);toast('Check-in saved 🔥');flashMotiv()});
+</script>
+</body>
+</html>

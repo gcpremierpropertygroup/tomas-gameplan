@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#06060f">
+<title>TG Parent Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#06060f;--surface:rgba(255,255,255,.03);--surface2:rgba(255,255,255,.055);--surface3:rgba(255,255,255,.09);
+  --neon:#00e5ff;--neon-glow:rgba(0,229,255,.18);--neon-soft:rgba(0,229,255,.08);
+  --fire:#ff4757;--fire-glow:rgba(255,71,87,.15);
+  --gold:#ffc312;--gold-glow:rgba(255,195,18,.12);
+  --mint:#0be881;--mint-glow:rgba(11,232,129,.15);
+  --purple:#a855f7;--purple-glow:rgba(168,85,247,.12);
+  --text:#eef0ff;--text2:#7a7da8;--text3:#484b6a;
+  --border:rgba(255,255,255,.06);
+  --glass:rgba(15,15,30,.65);--glass-border:rgba(255,255,255,.08);
+  --radius:18px;
+}
+body{
+  font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);
+  min-height:100vh;min-height:100dvh;overflow-x:hidden;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,229,255,.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(168,85,247,.03) 0%, transparent 50%);
+}
+.header{padding:24px 20px 16px;display:flex;align-items:center;gap:14px}
+.header-icon{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--neon),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:#fff;box-shadow:0 4px 20px rgba(0,229,255,.25)}
+.header h1{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.header .sub{font-size:13px;color:var(--text2);margin-top:2px}
+.sync-bar{padding:0 20px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--mint);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sync-text{font-size:12px;color:var(--text2)}
+.refresh-btn{margin-left:auto;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s}
+.refresh-btn:hover{background:var(--surface2);color:var(--text)}
+.refresh-btn:active{transform:scale(.96)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px;margin-bottom:20px}
+.stat-card{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:14px;padding:14px 10px;text-align:center}
+.stat-num{font-size:28px;font-weight:800;font-family:'Space Mono',monospace;line-height:1}
+.stat-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-top:6px}
+.stat-overdue .stat-num{color:var(--fire)}
+.stat-pending .stat-num{color:var(--gold)}
+.stat-progress .stat-num{color:var(--neon)}
+.stat-done .stat-num{color:var(--mint)}
+.section{padding:0 16px;margin-bottom:24px}
+.section-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title .dot{width:6px;height:6px;border-radius:50%}
+.hw-card{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;margin-bottom:10px;transition:transform .15s,border-color .2s;position:relative;overflow:hidden}
+.hw-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
+.hw-card.overdue::before{background:var(--fire)}
+.hw-card.pending::before{background:var(--gold)}
+.hw-card.in-progress::before{background:var(--neon)}
+.hw-card.done::before{background:var(--mint)}
+.hw-card.done{opacity:.5}
+.hw-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.hw-name{font-size:15px;font-weight:600;line-height:1.3;flex:1;padding-right:8px}
+.hw-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.badge-overdue{background:var(--fire-glow);color:var(--fire);border:1px solid rgba(255,71,87,.2)}
+.badge-pending{background:var(--gold-glow);color:var(--gold);border:1px solid rgba(255,195,18,.2)}
+.badge-in-progress{background:var(--neon-soft);color:var(--neon);border:1px solid rgba(0,229,255,.15)}
+.badge-done{background:var(--mint-glow);color:var(--mint);border:1px solid rgba(11,232,129,.2)}
+.hw-meta{display:flex;gap:12px;flex-wrap:wrap}
+.hw-meta span{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px}
+.activity-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.activity-item:last-child{border-bottom:none}
+.activity-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.activity-icon.added{background:var(--mint-glow);color:var(--mint)}
+.activity-icon.completed{background:var(--gold-glow);color:var(--gold)}
+.activity-icon.deleted{background:var(--fire-glow);color:var(--fire)}
+.activity-icon.status_change{background:var(--neon-soft);color:var(--neon)}
+.activity-icon.current{background:var(--purple-glow);color:var(--purple)}
+.activity-text{flex:1;font-size:13px;line-height:1.4}
+.activity-text strong{font-weight:600}
+.activity-time{font-size:11px;color:var(--text3);margin-top:2px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-state .icon{font-size:48px;margin-bottom:16px}
+.empty-state p{font-size:14px;line-height:1.5}
+.loading{text-align:center;padding:80px 20px}
+.spinner{width:40px;height:40px;border:3px solid var(--surface3);border-top-color:var(--neon);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{color:var(--text2);font-size:14px}
+.error-state{text-align:center;padding:60px 20px;color:var(--fire)}
+.error-state p{font-size:14px;margin-top:8px;color:var(--text2)}
+.setup-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;margin:20px 16px;text-align:center}
+.setup-card p{font-size:14px;color:var(--text2);margin-bottom:16px;line-height:1.5}
+.setup-card input{width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:14px;margin-bottom:12px;outline:none}
+.setup-card input:focus{border-color:var(--neon)}
+.setup-card button{width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--neon),var(--purple));color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.bottom-spacer{height:40px}
+@media(max-width:400px){.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-icon">TG</div>
+  <div>
+    <h1>Tomas Tracker</h1>
+    <div class="sub">Parent Dashboard</div>
+  </div>
+</div>
+<div class="sync-bar">
+  <div class="sync-dot" id="syncDot"></div>
+  <span class="sync-text" id="syncText">Connecting...</span>
+  <button class="refresh-btn" onclick="fetchData()">Refresh</button>
+</div>
+<div id="app">
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Loading homework data...</p>
+  </div>
+</div>
+<div class="bottom-spacer"></div>
+<script>
+const SCRIPT_URL = localStorage.getItem('tg_parent_url') || 'https://script.google.com/macros/s/AKfycbz_eRMrzLYxS90D_k9gAaMHfLCs0mpyr0VLvPluT-WmbIKztTLU_EUmzVK8Wc27wkQ/exec';
+function $(s){return document.querySelector(s)}
+function getStatusInfo(hw) {
+  const today = new Date().toISOString().slice(0,10);
+  const status = (hw.status || 'not-started').toLowerCase();
+  if (status === 'done') return {cls:'done', badge:'Done', badgeCls:'badge-done'};
+  if (status === 'in-progress') return {cls:'in-progress', badge:'In Progress', badgeCls:'badge-in-progress'};
+  if (hw.due && hw.due < today && status !== 'done') return {cls:'overdue', badge:'Overdue', badgeCls:'badge-overdue'};
+  return {cls:'pending', badge:'To Do', badgeCls:'badge-pending'};
+}
+function formatDue(due) {
+  if (!due) return '';
+  try {
+    const d = new Date(due + 'T00:00:00');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const diff = Math.round((d - today) / 86400000);
+    if (diff < 0) return Math.abs(diff) + 'd overdue';
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Tomorrow';
+    return d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+  } catch(e) { return due; }
+}
+function actionIcon(action) {
+  if (action === 'added') return '+';
+  if (action === 'completed') return '\u2713';
+  if (action === 'deleted') return '\u2717';
+  if (action === 'status_change') return '\u21BB';
+  return '\u2022';
+}
+function actionText(item) {
+  const name = '<strong>' + (item.name || 'Unknown') + '</strong>';
+  if (item.action === 'added') return name + ' was added';
+  if (item.action === 'completed') return name + ' marked complete';
+  if (item.action === 'deleted') return name + ' was removed';
+  if (item.action === 'status_change') return name + ' status changed to ' + (item.status || '');
+  return name + ' synced';
+}
+function renderDashboard(data) {
+  const hw = data.homework || [];
+  const activity = data.activity || [];
+  const today = new Date().toISOString().slice(0,10);
+  let overdue=0, pending=0, inProgress=0, done=0;
+  hw.forEach(h => {
+    const s = (h.status||'not-started').toLowerCase();
+    if (s === 'done') { done++; return; }
+    if (s === 'in-progress') { inProgress++; }
+    else { pending++; }
+    if (h.due && h.due < today && s !== 'done') overdue++;
+  });
+  const sorted = [...hw].filter(h => (h.status||'').toLowerCase() !== 'done')
+    .sort((a,b) => {
+      const aOver = a.due && a.due < today ? 0 : 1;
+      const bOver = b.due && b.due < today ? 0 : 1;
+      if (aOver !== bOver) return aOver - bOver;
+      return (a.due||'9999') < (b.due||'9999') ? -1 : 1;
+    });
+  const completed = hw.filter(h => (h.status||'').toLowerCase() === 'done');
+  let html = '';
+  html += '<div class="stats">';
+  html += '<div class="stat-card stat-overdue"><div class="stat-num">' + overdue + '</div><div class="stat-label">Overdue</div></div>';
+  html += '<div class="stat-card stat-pending"><div class="stat-num">' + pending + '</div><div class="stat-label">To Do</div></div>';
+  html += '<div class="stat-card stat-progress"><div class="stat-num">' + inProgress + '</div><div class="stat-label">Doing</div></div>';
+  html += '<div class="stat-card stat-done"><div class="stat-num">' + done + '</div><div class="stat-label">Done</div></div>';
+  html += '</div>';
+  if (sorted.length > 0) {
+    html += '<div class="section"><div class="section-title"><span class="dot" style="background:var(--gold)"></span>Active Assignments</div>';
+    sorted.forEach(h => {
+      const info = getStatusInfo(h);
+      html += '<div class="hw-card ' + info.cls + '"><div class="hw-card-top"><div class="hw-name">' + (h.name||'Untitled') + '</div>';
+      html += '<span class="hw-badge ' + info.badgeCls + '">' + info.badge + '</span></div>';
+      html += '<div class="hw-meta">';
+      if (h.subject) html += '<span>\uD83D\uDCDA ' + h.subject + '</span>';
+      if (h.due) html += '<span>\uD83D\uDCC5 ' + formatDue(h.due) + '</span>';
+      if (h.priority) html += '<span>\u26A1 ' + h.priority + '</span>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+  if (completed.length > 0) {
+    html += '<div class="section"><div class="section-title"><span class="dot" style="background:var(--mint)"></span>Completed (' + completed.length + ')</div>';
+    completed.forEach(h => {
+      const info = getStatusInfo(h);
+      html += '<div class="hw-card done"><div class="hw-card-top"><div class="hw-name">' + (h.name||'Untitled') + '</div>';
+      html += '<span class="hw-badge badge-done">Done</span></div>';
+      html += '<div class="hw-meta">';
+      if (h.subject) html += '<span>\uD83D\uDCDA ' + h.subject + '</span>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+  if (activity.length > 0) {
+    html += '<div class="section"><div class="section-title"><span class="dot" style="background:var(--purple)"></span>Recent Activity</div>';
+    activity.slice(0, 15).forEach(item => {
+      const action = (item.action||'update').toLowerCase();
+      html += '<div class="activity-item"><div class="activity-icon ' + action + '">' + actionIcon(action) + '</div>';
+      html += '<div><div class="activity-text">' + actionText(item) + '</div>';
+      html += '<div class="activity-time">' + (item.timestamp || '') + '</div></div></div>';
+    });
+    html += '</div>';
+  }
+  if (hw.length === 0 && activity.length === 0) {
+    html += '<div class="empty-state"><div class="icon">\uD83D\uDCCB</div>';
+    html += '<p>No homework tracked yet.<br>Assignments will appear here when Tomas adds them.</p></div>';
+  }
+  $('#app').innerHTML = html;
+}
+async function fetchData() {
+  if (!SCRIPT_URL) { showSetup(); return; }
+  $('#syncDot').style.background = 'var(--gold)';
+  $('#syncText').textContent = 'Syncing...';
+  try {
+    const resp = await fetch(SCRIPT_URL);
+    const data = await resp.json();
+    if (data.status === 'ok') {
+      renderDashboard(data);
+      $('#syncDot').style.background = 'var(--mint)';
+      $('#syncText').textContent = 'Last updated: ' + (data.fetchedAt || 'just now');
+    } else { showError(data.message || 'Unknown error'); }
+  } catch(e) {
+    showError('Could not connect. The Apps Script may need redeployment with GET support.');
+    console.error('Fetch error:', e);
+  }
+}
+function showError(msg) {
+  $('#syncDot').style.background = 'var(--fire)';
+  $('#syncText').textContent = 'Connection error';
+  $('#app').innerHTML = '<div class="error-state"><div style="font-size:36px">\u26A0\uFE0F</div><p>' + msg + '</p></div>';
+}
+function showSetup() {
+  $('#app').innerHTML = '<div class="setup-card"><p>Paste your Apps Script URL to connect the parent dashboard.</p><input type="text" id="urlInput" placeholder="https://script.google.com/macros/s/..."><button onclick="saveUrl()">Connect</button></div>';
+}
+function saveUrl() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (url) { localStorage.setItem('tg_parent_url', url); location.reload(); }
+}
+setInterval(fetchData, 120000);
+fetchData();
+</script>
+</body>
+</html>

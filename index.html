@@ -770,7 +770,7 @@ for(let i=1;i<=3;i++){
 updateB3();
 
 /* ===== HOMEWORK TRACKER ===== */
-const APPS_SCRIPT_URL = localStorage.getItem('tg_sync_url') || '';
+const APPS_SCRIPT_URL = localStorage.getItem('tg_sync_url') || 'https://script.google.com/macros/s/AKfycbz_eRMrzLYxS90D_k9gAaMHfLCs0mpyr0VLvPluT-WmbIKztTLU_EUmzVK8Wc27wkQ/exec';
 function syncToSheet(action, hw) {
   if (!APPS_SCRIPT_URL) return;
   const payload = { action: action, hw: hw || {} };

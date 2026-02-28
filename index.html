@@ -240,6 +240,18 @@ select.hw-f-input{
 }
 .hw-add-submit:hover::before{transform:translateX(100%)}
 .hw-add-submit:active{transform:scale(.96);opacity:.9}
+.hw-sync-btn{
+  width:100%;padding:14px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,#00e676,#00bfa5);color:#000;
+  font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;
+  transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 20px rgba(0,230,118,.2);position:relative;overflow:hidden;margin-top:12px;
+}
+.hw-sync-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.15) 50%,transparent 70%);transform:translateX(-100%);transition:transform .4s}
+.hw-sync-btn:hover::before{transform:translateX(100%)}
+.hw-sync-btn:active{transform:scale(.96);opacity:.9}
+.hw-sync-btn.syncing{animation:syncPulse 1s ease-in-out infinite}
+@keyframes syncPulse{0%,100%{opacity:1}50%{opacity:.6}}
 
 .hw-filter-bar{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .hw-filter-bar::-webkit-scrollbar{display:none}
@@ -558,6 +570,7 @@ select.hw-f-input{
     <button class="hw-filter" data-filter="done">Done <span class="count" id="hw-done-c"></span></button>
   </div>
   <div id="hw-list-container"></div>
+  <button class="hw-sync-btn" id="hw-sync-btn">SYNC TO DAD’S TRACKER 🔄</button>
 </div>
 
 <div class="page" id="score">
@@ -970,6 +983,17 @@ $$('.hw-filter').forEach(btn=>{
 });
 
 renderHW();
+
+$('#hw-sync-btn').addEventListener('click',()=>{
+  const btn=$('#hw-sync-btn');
+  btn.classList.add('syncing');btn.textContent='SYNCING...';
+  fullSync();
+  setTimeout(()=>{
+    btn.classList.remove('syncing');btn.textContent='SYNCED ✅';
+    addXP(3);toast("Synced to Dad's tracker! +3 XP");
+    setTimeout(()=>{btn.textContent='SYNC TO DAD’S TRACKER 🔄'},2500);
+  },1500);
+});
 
 /* Scoreboard */
 let scores=load('scores_'+wk,{});

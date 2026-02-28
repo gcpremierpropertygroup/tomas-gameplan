@@ -619,6 +619,35 @@ select.hw-f-input{
 <div class="toast" id="toast">Saved</div>
 <div class="motiv-flash" id="motiv"></div>
 
+<!-- Settings overlay (long-press avatar to open) -->
+<div id="settings-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:24px;overflow-y:auto">
+  <div style="max-width:400px;margin:60px auto 0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <div style="font-size:20px;font-weight:800;color:var(--text)">Settings</div>
+      <button id="close-settings" style="background:none;border:none;color:var(--text3);font-size:28px;cursor:pointer">×</button>
+    </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:12px;font-weight:700;color:var(--text3);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Parent Tracker URL</label>
+      <input id="sync-url-input" type="url" placeholder="Paste Apps Script URL here"
+        style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:12px;
+        padding:14px;color:var(--text);font-size:14px;outline:none">
+      <div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.5">
+        This connects homework data to Dad's Google Sheet tracker. Leave blank if not set up yet.
+      </div>
+    </div>
+    <button id="save-sync-url" style="width:100%;padding:14px;border:none;border-radius:14px;
+      background:linear-gradient(135deg,var(--neon),var(--purple));color:#000;
+      font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.5px;text-transform:uppercase">
+      Save & Sync
+    </button>
+    <div style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Sync Status</div>
+      <div id="sync-status" style="font-size:13px;color:var(--text2)">Not configured</div>
+    </div>
+  </div>
+</div>
+
 <div class="nav">
   <div class="nav-btn active" data-page="plan"><span class="icon">⚡</span>Today</div>
   <div class="nav-btn" data-page="homework"><span class="icon">📋</span>HW</div>
@@ -741,6 +770,29 @@ for(let i=1;i<=3;i++){
 updateB3();
 
 /* ===== HOMEWORK TRACKER ===== */
+const APPS_SCRIPT_URL = localStorage.getItem('tg_sync_url') || '';
+function syncToSheet(action, hw) {
+  if (!APPS_SCRIPT_URL) return;
+  const payload = { action: action, hw: hw || {} };
+  try {
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+  } catch(e) {}
+}
+function fullSync() {
+  if (!APPS_SCRIPT_URL) return;
+  try {
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'sync_all', all: hwData })
+    }).catch(() => {});
+  } catch(e) {}
+}
+
 let hwData=load('hw_all',[]);
 let hwFilter='all';
 
@@ -867,7 +919,10 @@ function renderHW(){
       const next=states[(states.indexOf(cur)+1)%3];
       const wasDone=cur==='done';
       hwData[i].status=next;
-      save('hw_all',hwData);renderHW();
+      save('hw_all',hwData);
+      syncToSheet(next==='done'?'completed':'status_change', hwData[i]);
+      fullSync();
+      renderHW();
       if(next==='done'&&!wasDone){addXP(XP_PER_HW_DONE);flashMotiv();bumpStreak();toast('Assignment done! +10 XP')}
     });
   });
@@ -876,8 +931,9 @@ function renderHW(){
   });
   container.querySelectorAll('.hw-action-btn.del').forEach(btn=>{
     btn.addEventListener('click',()=>{
+      const removed=hwData[parseInt(btn.dataset.idx)];
       hwData.splice(parseInt(btn.dataset.idx),1);
-      save('hw_all',hwData);renderHW();toast('Removed');
+      save('hw_all',hwData);syncToSheet('deleted',removed);fullSync();renderHW();toast('Removed');
     });
   });
 }
@@ -897,6 +953,7 @@ $('#hw-add-btn').addEventListener('click',()=>{
   };
   hwData.push(hw);
   save('hw_all',hwData);
+  syncToSheet('added', hw);
   $('#hw-f-name').value='';$('#hw-f-subject').value='';$('#hw-f-due').value='';$('#hw-f-pri').value='';
   renderHW();
   addXP(5);toast('Added! +5 XP');
@@ -943,6 +1000,32 @@ $('#reset-week').addEventListener('click',()=>{if(confirm('Reset scores?')){scor
 const ci=load('ci_'+wk,{});
 for(let i=1;i<=4;i++){const ta=$(`#ci-${i}`);ta.value=ci['q'+i]||'';ta.addEventListener('input',()=>{ci['q'+i]=ta.value;save('ci_'+wk,ci)})}
 $('#save-ci').addEventListener('click',()=>{save('ci_'+wk,ci);addXP(50);toast('Check-in saved 🔥');flashMotiv()});
+
+/* Settings panel — long-press avatar */
+let avatarTimer=null;
+const avatar=$('.avatar');
+avatar.addEventListener('touchstart',()=>{avatarTimer=setTimeout(()=>{$('#settings-overlay').style.display='block';
+  $('#sync-url-input').value=localStorage.getItem('tg_sync_url')||'';
+  $('#sync-status').textContent=APPS_SCRIPT_URL?'Connected — syncing to Google Sheet':'Not configured';
+},800)},{passive:true});
+avatar.addEventListener('touchend',()=>clearTimeout(avatarTimer));
+avatar.addEventListener('touchmove',()=>clearTimeout(avatarTimer));
+/* Also double-click for desktop */
+avatar.addEventListener('dblclick',()=>{$('#settings-overlay').style.display='block';
+  $('#sync-url-input').value=localStorage.getItem('tg_sync_url')||'';
+  $('#sync-status').textContent=APPS_SCRIPT_URL?'Connected — syncing to Google Sheet':'Not configured';
+});
+$('#close-settings').addEventListener('click',()=>{$('#settings-overlay').style.display='none'});
+$('#save-sync-url').addEventListener('click',()=>{
+  const url=$('#sync-url-input').value.trim();
+  localStorage.setItem('tg_sync_url',url);
+  toast(url?'Sync URL saved! Syncing now...':'Sync URL cleared');
+  $('#sync-status').textContent=url?'Connected — syncing to Google Sheet':'Not configured';
+  if(url){setTimeout(()=>{location.reload()},500)}
+});
+
+/* Auto-sync on page load if URL configured */
+if(APPS_SCRIPT_URL){setTimeout(fullSync,2000)}
 </script>
 </body>
 </html>

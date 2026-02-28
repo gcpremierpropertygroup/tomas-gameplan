@@ -245,13 +245,30 @@ select.hw-f-input{
   background:linear-gradient(135deg,#00e676,#00bfa5);color:#000;
   font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;
   transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;
-  box-shadow:0 4px 20px rgba(0,230,118,.2);position:relative;overflow:hidden;margin-top:12px;
+  box-shadow:0 4px 20px rgba(0,230,118,.2);position:relative;overflow:hidden;
+  margin-top:12px;
 }
-.hw-sync-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.15) 50%,transparent 70%);transform:translateX(-100%);transition:transform .4s}
+.hw-sync-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.15) 50%,transparent 70%);
+  transform:translateX(-100%);transition:transform .4s;
+}
 .hw-sync-btn:hover::before{transform:translateX(100%)}
 .hw-sync-btn:active{transform:scale(.96);opacity:.9}
 .hw-sync-btn.syncing{animation:syncPulse 1s ease-in-out infinite}
 @keyframes syncPulse{0%,100%{opacity:1}50%{opacity:.6}}
+.b3-lock-btn{
+  width:100%;padding:14px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,#7c4dff,#536dfe);color:#fff;
+  font-size:13px;font-weight:800;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;
+  transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 20px rgba(124,77,255,.25);position:relative;overflow:hidden;margin-top:14px;
+}
+.b3-lock-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.15) 50%,transparent 70%);transform:translateX(-100%);transition:transform .4s}
+.b3-lock-btn:hover::before{transform:translateX(100%)}
+.b3-lock-btn:active{transform:scale(.96);opacity:.9}
+.b3-lock-btn.syncing{animation:syncPulse 1s ease-in-out infinite}
+.b3-lock-btn.locked{background:linear-gradient(135deg,#00e676,#00bfa5);color:#000;box-shadow:0 4px 20px rgba(0,230,118,.25)}
 
 .hw-filter-bar{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .hw-filter-bar::-webkit-scrollbar{display:none}
@@ -525,6 +542,7 @@ select.hw-f-input{
       <input class="big3-input" id="b3-3" placeholder="Third priority">
       <button class="check-btn" id="b3c-3"></button>
     </div>
+    <button class="b3-lock-btn" id="b3-lock-btn">LOCK IT IN 🔒</button>
   </div>
   <div class="card">
     <div class="card-label" id="sched-label">⏰ Schedule</div>
@@ -570,7 +588,7 @@ select.hw-f-input{
     <button class="hw-filter" data-filter="done">Done <span class="count" id="hw-done-c"></span></button>
   </div>
   <div id="hw-list-container"></div>
-  <button class="hw-sync-btn" id="hw-sync-btn">SYNC TO DAD’S TRACKER 🔄</button>
+  <button class="hw-sync-btn" id="hw-sync-btn">SYNC TO DAD'S TRACKER 🔄</button>
 </div>
 
 <div class="page" id="score">
@@ -782,6 +800,43 @@ for(let i=1;i<=3;i++){
 }
 updateB3();
 
+/* Lock It In - Big 3 sync */
+function syncBig3() {
+  if (!APPS_SCRIPT_URL) return;
+  const payload = {
+    action: 'sync_big3',
+    date: todayKey,
+    big3: {
+      items: big3.items,
+      checks: big3.checks
+    }
+  };
+  try {
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+  } catch(e) {}
+}
+
+$('#b3-lock-btn').addEventListener('click', () => {
+  const filled = big3.items.filter(s => s.trim()).length;
+  if (filled === 0) { toast('Set at least one goal first!'); return; }
+  const btn = $('#b3-lock-btn');
+  btn.classList.add('syncing');
+  btn.textContent = 'LOCKING IN...';
+  syncBig3();
+  setTimeout(() => {
+    btn.classList.remove('syncing');
+    btn.classList.add('locked');
+    btn.textContent = 'LOCKED IN ✅';
+    addXP(5);
+    toast('Goals locked in! +5 XP 🔒');
+    setTimeout(() => { btn.classList.remove('locked'); btn.textContent = 'LOCK IT IN 🔒'; }, 2500);
+  }, 1500);
+});
+
 /* ===== HOMEWORK TRACKER ===== */
 const APPS_SCRIPT_URL = localStorage.getItem('tg_sync_url') || 'https://script.google.com/macros/s/AKfycbz_eRMrzLYxS90D_k9gAaMHfLCs0mpyr0VLvPluT-WmbIKztTLU_EUmzVK8Wc27wkQ/exec';
 function syncToSheet(action, hw) {
@@ -986,12 +1041,14 @@ renderHW();
 
 $('#hw-sync-btn').addEventListener('click',()=>{
   const btn=$('#hw-sync-btn');
-  btn.classList.add('syncing');btn.textContent='SYNCING...';
+  btn.classList.add('syncing');
+  btn.textContent='SYNCING...';
   fullSync();
   setTimeout(()=>{
-    btn.classList.remove('syncing');btn.textContent='SYNCED ✅';
-    addXP(3);toast("Synced to Dad's tracker! +3 XP");
-    setTimeout(()=>{btn.textContent='SYNC TO DAD’S TRACKER 🔄'},2500);
+    btn.classList.remove('syncing');
+    btn.textContent='SYNCED ✅';
+    addXP(3);toast('Synced to Dad\'s tracker! +3 XP');
+    setTimeout(()=>{btn.textContent='SYNC TO DAD\'S TRACKER 🔄'},2500);
   },1500);
 });
 

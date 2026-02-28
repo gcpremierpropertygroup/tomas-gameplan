@@ -588,7 +588,7 @@ select.hw-f-input{
     <button class="hw-filter" data-filter="done">Done <span class="count" id="hw-done-c"></span></button>
   </div>
   <div id="hw-list-container"></div>
-  <button class="hw-sync-btn" id="hw-sync-btn">SYNC TO DAD'S TRACKER 🔄</button>
+  <button class="hw-sync-btn" id="hw-sync-btn">SYNC HOMEWORK 🔄</button>
 </div>
 
 <div class="page" id="score">
@@ -659,12 +659,12 @@ select.hw-f-input{
       <button id="close-settings" style="background:none;border:none;color:var(--text3);font-size:28px;cursor:pointer">×</button>
     </div>
     <div style="margin-bottom:20px">
-      <label style="font-size:12px;font-weight:700;color:var(--text3);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Parent Tracker URL</label>
+      <label style="font-size:12px;font-weight:700;color:var(--text3);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Sync URL</label>
       <input id="sync-url-input" type="url" placeholder="Paste Apps Script URL here"
         style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:12px;
         padding:14px;color:var(--text);font-size:14px;outline:none">
       <div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.5">
-        This connects homework data to Dad's Google Sheet tracker. Leave blank if not set up yet.
+        This saves your homework data to the cloud. Leave blank if not set up yet.
       </div>
     </div>
     <button id="save-sync-url" style="width:100%;padding:14px;border:none;border-radius:14px;
@@ -1047,8 +1047,8 @@ $('#hw-sync-btn').addEventListener('click',()=>{
   setTimeout(()=>{
     btn.classList.remove('syncing');
     btn.textContent='SYNCED ✅';
-    addXP(3);toast('Synced to Dad\'s tracker! +3 XP');
-    setTimeout(()=>{btn.textContent='SYNC TO DAD\'S TRACKER 🔄'},2500);
+    addXP(3);toast('Homework synced! +3 XP');
+    setTimeout(()=>{btn.textContent='SYNC HOMEWORK 🔄'},2500);
   },1500);
 });
 

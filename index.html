@@ -1467,89 +1467,141 @@ renderCalendar();
     list.innerHTML = '';
     statsRow.innerHTML = '';
 
-    // Gather all past Big3 date keys (exclude today)
-    const dates = [];
+    const hwAll = load('hw_all', []);
+
+    // Collect all unique past dates from Big3 keys AND hw added dates
+    const dateSet = new Set();
     for(let i=0;i<localStorage.length;i++){
       const key=localStorage.key(i);
       if(key && key.startsWith('tg_big3_')){
         const d=key.replace('tg_big3_','');
-        if(d!==todayKey) dates.push(d);
+        if(d !== todayKey) dateSet.add(d);
       }
     }
-    dates.sort((a,b)=>b.localeCompare(a)); // newest first
+    hwAll.forEach(h=>{
+      if(h.added && h.added !== todayKey) dateSet.add(h.added);
+    });
 
-    if(dates.length===0){
-      list.innerHTML='<div class="hist-empty">No past sessions yet.<br>Come back tomorrow 💪</div>';
+    const dates = [...dateSet].sort((a,b)=>b.localeCompare(a));
+
+    if(dates.length === 0 && hwAll.length === 0){
+      list.innerHTML='<div class="hist-empty">No history yet.<br>Come back tomorrow 💪</div>';
       return;
     }
 
-    // Aggregate stats across all history
-    let totalDays=dates.length, totalB3=0, totalHWDone=0;
-    const hwAll=load('hw_all',[]);
-    dates.forEach(date=>{
+    // Stats
+    const totalHWDone = hwAll.filter(h=>h.status==='done').length;
+    const totalHW = hwAll.length;
+    const perfectDays = dates.filter(date=>{
       const b3=load('big3_'+date,null);
-      if(b3) totalB3+=b3.checks.filter(Boolean).length;
-    });
-    totalHWDone=hwAll.filter(h=>h.status==='done').length;
-    const perfectDays=dates.filter(date=>{
-      const b3=load('big3_'+date,null);
-      return b3&&b3.checks.filter(Boolean).length===3;
+      return b3 && b3.checks.filter(Boolean).length===3;
     }).length;
 
-    // Stats strip
     statsRow.innerHTML=`
-      <div class="hist-stat"><div class="hist-stat-num">${totalDays}</div><div class="hist-stat-lbl">Days Logged</div></div>
+      <div class="hist-stat"><div class="hist-stat-num">${dates.length}</div><div class="hist-stat-lbl">Days Logged</div></div>
       <div class="hist-stat"><div class="hist-stat-num" style="color:var(--gold)">${perfectDays}</div><div class="hist-stat-lbl">Perfect Days</div></div>
-      <div class="hist-stat"><div class="hist-stat-num" style="color:var(--fire)">${totalHWDone}</div><div class="hist-stat-lbl">HW Done</div></div>
+      <div class="hist-stat"><div class="hist-stat-num" style="color:var(--fire)">${totalHWDone}/${totalHW}</div><div class="hist-stat-lbl">HW Done</div></div>
     `;
+
+    // All HW section (sorted by due date, done last)
+    if(hwAll.length){
+      const allHWEntry = document.createElement('div');
+      allHWEntry.className = 'hist-entry';
+      const sortedHW = [...hwAll].sort((a,b)=>{
+        const ad=a.status==='done'?1:0, bd=b.status==='done'?1:0;
+        if(ad!==bd) return ad-bd;
+        if(a.due&&b.due) return a.due.localeCompare(b.due);
+        return 0;
+      });
+      const hwItems = sortedHW.map(h=>{
+        const isDone = h.status==='done';
+        const priColor = h.pri==1?'var(--fire)':h.pri==2?'var(--gold)':'var(--neon)';
+        const dueStr = h.due ? ` · due ${new Date(h.due+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}` : '';
+        return `<div class="hist-hw-item ${isDone?'done':''}">
+          <span>${isDone?'✅':h.pri?`<span style="font-size:9px;font-weight:900;color:${priColor};border:1px solid ${priColor};border-radius:4px;padding:1px 4px">P${h.pri}</span>`:'📌'}</span>
+          <span class="hist-hw-name">${h.name||'Untitled'}</span>
+          ${h.subject?`<span class="hist-hw-sub">${h.subject}${dueStr}</span>`:(dueStr?`<span class="hist-hw-sub">${dueStr.slice(3)}</span>`:'')}
+        </div>`;
+      }).join('');
+      allHWEntry.innerHTML=`
+        <div class="hist-date-row" style="margin-bottom:14px">
+          <div class="hist-date">📚 All Homework</div>
+          <div class="hist-b3-badge cyan">${totalHWDone} done</div>
+        </div>
+        <div class="hist-hw-block" style="margin-top:0">${hwItems}</div>
+      `;
+      list.appendChild(allHWEntry);
+    }
 
     // Day entries
     dates.forEach(date=>{
-      const b3=load('big3_'+date,null);
-      if(!b3) return;
+      const b3 = load('big3_'+date, null);
+      const d = new Date(date+'T12:00:00');
+      const dayLabel = d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
 
-      const d=new Date(date+'T12:00:00');
-      const dayLabel=d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
-      const doneCount=b3.checks.filter(Boolean).length;
-      const badgeCls=doneCount===3?'gold':doneCount>0?'cyan':'dim';
-      const badgeTxt=doneCount===3?'✓ All 3':doneCount+'/3';
+      // HW added on this day
+      const hwAdded = hwAll.filter(h=>h.added===date);
+      // HW due on this day (but not already in hwAdded)
+      const hwDue = hwAll.filter(h=>h.due===date && h.added!==date);
 
-      // HW due that day
-      const hwDue=hwAll.filter(h=>h.due===date);
+      // Skip day if no Big3 and no HW activity
+      if(!b3 && hwAdded.length===0 && hwDue.length===0) return;
 
-      const entry=document.createElement('div');
-      entry.className='hist-entry';
+      const entry = document.createElement('div');
+      entry.className = 'hist-entry';
 
-      // Big 3 items
-      const b3HTML=b3.items.map((item,i)=>{
-        if(!item) return `<div class="hist-b3-item skipped"><span class="hist-check">—</span><span class="hist-b3-text">Not set</span></div>`;
-        const cls=b3.checks[i]?'done':'';
-        const icon=b3.checks[i]?'✅':'⬜';
-        return `<div class="hist-b3-item ${cls}"><span class="hist-check">${icon}</span><span class="hist-b3-text">${item}</span></div>`;
-      }).join('');
+      // Big 3 block
+      let b3HTML = '';
+      if(b3){
+        const doneCount = b3.checks.filter(Boolean).length;
+        const badgeCls = doneCount===3?'gold':doneCount>0?'cyan':'dim';
+        const badgeTxt = doneCount===3?'✓ All 3':doneCount+'/3';
+        const items = b3.items.map((item,i)=>{
+          if(!item) return '';
+          const cls = b3.checks[i]?'done':'';
+          const icon = b3.checks[i]?'✅':'⬜';
+          return `<div class="hist-b3-item ${cls}"><span class="hist-check">${icon}</span><span class="hist-b3-text">${item}</span></div>`;
+        }).join('');
+        b3HTML=`
+          <div class="hist-date-row">
+            <div class="hist-date">${dayLabel}</div>
+            <div class="hist-b3-badge ${badgeCls}">${badgeTxt}</div>
+          </div>
+          ${items}`;
+      } else {
+        b3HTML=`<div class="hist-date-row"><div class="hist-date">${dayLabel}</div></div>`;
+      }
 
-      // HW block
-      let hwHTML='';
-      if(hwDue.length){
-        const hwItems=hwDue.map(h=>{
-          const isDone=h.status==='done';
+      // HW added this day
+      let hwAddedHTML = '';
+      if(hwAdded.length){
+        const items = hwAdded.map(h=>{
+          const isDone = h.status==='done';
+          const dueStr = h.due?` · due ${new Date(h.due+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}` :'';
           return `<div class="hist-hw-item ${isDone?'done':''}">
-            <span>${isDone?'✅':'📌'}</span>
+            <span>${isDone?'✅':'➕'}</span>
+            <span class="hist-hw-name">${h.name||'Untitled'}</span>
+            ${h.subject?`<span class="hist-hw-sub">${h.subject}${dueStr}</span>`:(dueStr?`<span class="hist-hw-sub">${dueStr.slice(3)}</span>`:'')}
+          </div>`;
+        }).join('');
+        hwAddedHTML=`<div class="hist-hw-block"><div class="hist-hw-lbl">HW logged this day</div>${items}</div>`;
+      }
+
+      // HW due this day (not logged same day)
+      let hwDueHTML = '';
+      if(hwDue.length){
+        const items = hwDue.map(h=>{
+          const isDone = h.status==='done';
+          return `<div class="hist-hw-item ${isDone?'done':''}">
+            <span>${isDone?'✅':'📅'}</span>
             <span class="hist-hw-name">${h.name||'Untitled'}</span>
             ${h.subject?`<span class="hist-hw-sub">${h.subject}</span>`:''}
           </div>`;
         }).join('');
-        hwHTML=`<div class="hist-hw-block"><div class="hist-hw-lbl">HW due this day</div>${hwItems}</div>`;
+        hwDueHTML=`<div class="hist-hw-block"><div class="hist-hw-lbl">HW due this day</div>${items}</div>`;
       }
 
-      entry.innerHTML=`
-        <div class="hist-date-row">
-          <div class="hist-date">${dayLabel}</div>
-          <div class="hist-b3-badge ${badgeCls}">${badgeTxt}</div>
-        </div>
-        ${b3HTML}
-        ${hwHTML}
-      `;
+      entry.innerHTML = b3HTML + hwAddedHTML + hwDueHTML;
       list.appendChild(entry);
     });
   }

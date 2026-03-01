@@ -834,7 +834,9 @@ $('#b3-lock-btn').addEventListener('click', () => {
     btn.classList.add('locked');
     btn.textContent = 'LOCKED IN ✅';
     addXP(5);
-    toast('Goals locked in! +5 XP 🔒');
+    bumpStreak();
+    const s=load('streak',{count:0});
+    toast('Goals locked in! +5 XP 🔒' + (s.count>1?' 🔥'+s.count+' day streak!':''));
     setTimeout(() => { btn.classList.remove('locked'); btn.textContent = 'LOCK IT IN 🔒'; }, 2500);
   }, 1500);
 });

@@ -835,6 +835,11 @@ $('#b3-lock-btn').addEventListener('click', () => {
     btn.textContent = 'LOCKED IN ✅';
     addXP(5);
     bumpStreak();
+    // auto-check Big 3 score toggle for today
+    const _dNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],_dNums=[1,2,3,4,5,6,0];
+    const _todayName=_dNames[_dNums.indexOf(now.getDay())];
+    const _b3key=_todayName+'_big3';
+    if(!scores[_b3key]){scores[_b3key]=true;save('scores_'+wk,scores);if(typeof renderScores==='function')renderScores();}
     const s=load('streak',{count:0});
     toast('Goals locked in! +5 XP 🔒' + (s.count>1?' 🔥'+s.count+' day streak!':''));
     setTimeout(() => { btn.classList.remove('locked'); btn.textContent = 'LOCK IT IN 🔒'; }, 2500);
@@ -994,7 +999,14 @@ function renderHW(){
       syncToSheet(next==='done'?'completed':'status_change', hwData[i]);
       fullSync();
       renderHW();
-      if(next==='done'&&!wasDone){addXP(XP_PER_HW_DONE);flashMotiv();bumpStreak();toast('Assignment done! +10 XP')}
+      if(next==='done'&&!wasDone){
+        addXP(XP_PER_HW_DONE);flashMotiv();bumpStreak();toast('Assignment done! +10 XP');
+        // auto-check HW score toggle if ALL assignments are now done
+        const _allDone=hwData.length>0&&hwData.every(h=>h.status==='done');
+        if(_allDone){const _dN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],_dI=[1,2,3,4,5,6,0];
+        const _dn=_dN[_dI.indexOf(now.getDay())],_hwk=_dn+'_hwin';
+        if(!scores[_hwk]){scores[_hwk]=true;save('scores_'+wk,scores);if(typeof renderScores==='function')renderScores();toast('All HW done! Score updated 📋✅');}}
+      }
     });
   });
   container.querySelectorAll('.hw-action-btn.cal').forEach(btn=>{

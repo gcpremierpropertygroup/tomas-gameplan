@@ -495,6 +495,68 @@ select.hw-f-input{
 
 @keyframes overdueGlow{0%,100%{box-shadow:0 0 0 rgba(255,71,87,0)}50%{box-shadow:0 0 16px rgba(255,71,87,.2)}}
 .hw-item.overdue{animation:overdueGlow 2.5s ease infinite}
+
+/* ===== CALENDAR ===== */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.cal-month-label{font-size:18px;font-weight:900;color:var(--text);letter-spacing:-.3px}
+.cal-nav-btn{width:40px;height:40px;border-radius:13px;border:1px solid rgba(255,255,255,.08);background:var(--surface2);cursor:pointer;color:var(--text2);font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.cal-nav-btn:active{transform:scale(.88);background:rgba(0,229,255,.1);color:var(--neon)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dow{text-align:center;font-size:10px;font-weight:800;color:var(--text3);letter-spacing:.5px;padding:0 0 10px;text-transform:uppercase}
+.cal-day{min-height:56px;border-radius:13px;padding:7px 5px 5px;background:var(--surface);border:1px solid transparent;cursor:pointer;position:relative;transition:all .2s;display:flex;flex-direction:column;align-items:center}
+.cal-day:active{transform:scale(.92)}
+.cal-day.other-month{opacity:.25}
+.cal-day.is-today{border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.07);box-shadow:0 0 16px rgba(0,229,255,.08)}
+.cal-day.is-today .cal-day-num{color:var(--neon);text-shadow:0 0 10px rgba(0,229,255,.4)}
+.cal-day.has-hw{background:var(--surface2)}
+.cal-day.selected{border-color:rgba(168,85,247,.5);background:rgba(168,85,247,.1)}
+.cal-day-num{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--text2);line-height:1;margin-bottom:5px}
+.cal-dots{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;max-width:34px}
+.cal-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.cal-dot.p1{background:var(--fire);box-shadow:0 0 4px rgba(255,71,87,.5)}
+.cal-dot.p2{background:var(--gold);box-shadow:0 0 4px rgba(255,195,18,.4)}
+.cal-dot.p3,.cal-dot.p-none{background:var(--neon);box-shadow:0 0 4px rgba(0,229,255,.4)}
+.cal-dot.done{background:rgba(255,255,255,.15);box-shadow:none}
+.cal-detail{margin-top:14px;background:var(--glass);border:1px solid rgba(168,85,247,.2);border-radius:18px;padding:16px;animation:fadeUp .25s ease;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.cal-detail-date{font-size:11px;font-weight:800;color:var(--purple);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
+.cal-detail-empty{text-align:center;padding:16px;color:var(--text3);font-size:13px}
+.cal-detail-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(255,255,255,.04)}
+.cal-detail-item:first-of-type{border-top:none}
+.cal-detail-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cal-detail-info{flex:1;min-width:0}
+.cal-detail-name{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-detail-name.done-txt{text-decoration:line-through;color:var(--text3)}
+.cal-detail-sub{font-size:11px;color:var(--text3);margin-top:2px;font-weight:500}
+.cal-legend{display:flex;gap:14px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.cal-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);font-weight:600}
+.cal-legend-dot{width:8px;height:8px;border-radius:50%}
+
+/* ===== HISTORY / LOG ===== */
+.hist-empty{text-align:center;padding:40px 0;color:var(--text3);font-size:14px;font-weight:600;line-height:1.7}
+.hist-entry{padding:18px 0;border-bottom:1px solid var(--border)}
+.hist-entry:last-child{border-bottom:none}
+.hist-date-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.hist-date{font-size:12px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.8px}
+.hist-b3-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:.3px}
+.hist-b3-badge.gold{background:rgba(255,195,18,.15);color:var(--gold)}
+.hist-b3-badge.cyan{background:rgba(0,229,255,.1);color:var(--neon)}
+.hist-b3-badge.dim{background:rgba(255,255,255,.05);color:var(--text3)}
+.hist-b3-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.hist-check{font-size:13px;flex-shrink:0;margin-top:1px;line-height:1.4}
+.hist-b3-text{font-size:13px;color:var(--text2);line-height:1.45;font-weight:500}
+.hist-b3-item.done .hist-b3-text{color:var(--text3);text-decoration:line-through}
+.hist-b3-item.skipped .hist-b3-text{color:rgba(255,255,255,.2);font-style:italic}
+.hist-hw-block{margin-top:12px;padding:12px 14px;background:var(--surface2);border-radius:12px;border:1px solid var(--border)}
+.hist-hw-lbl{font-size:10px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.hist-hw-item{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;padding:4px 0}
+.hist-hw-item.done{color:var(--text3)}
+.hist-hw-item.done .hist-hw-name{text-decoration:line-through}
+.hist-hw-item:not(.done){color:var(--text2)}
+.hist-hw-sub{color:var(--text3);font-size:11px;font-weight:500;margin-left:2px}
+.hist-stats-row{display:flex;gap:8px;margin-bottom:16px}
+.hist-stat{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 12px;text-align:center}
+.hist-stat-num{font-size:22px;font-weight:900;color:var(--neon);letter-spacing:-.5px}
+.hist-stat-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
 </style>
 </head>
 <body>
@@ -534,6 +596,7 @@ select.hw-f-input{
   <button class="tab" data-page="homework">HW</button>
   <button class="tab" data-page="score">Score</button>
   <button class="tab" data-page="checkin">Check-In</button>
+  <button class="tab" data-page="history">Log</button>
 </div>
 
 <div class="page active" id="plan">
@@ -705,11 +768,20 @@ select.hw-f-input{
   </div>
 </div>
 
+<div class="page" id="history">
+  <div class="card">
+    <div class="card-label">📖 Your Log</div>
+    <div id="hist-stats-row" class="hist-stats-row"></div>
+    <div id="hist-list"></div>
+  </div>
+</div>
+
 <div class="nav">
   <div class="nav-btn active" data-page="plan"><span class="icon">⚡</span>Today</div>
   <div class="nav-btn" data-page="homework"><span class="icon">📋</span>HW</div>
   <div class="nav-btn" data-page="score"><span class="icon">🏆</span>Score</div>
   <div class="nav-btn" data-page="checkin"><span class="icon">💬</span>Check</div>
+  <div class="nav-btn" data-page="cal"><span class="icon">📅</span>Cal</div>
 </div>
 
 <script>
@@ -1199,6 +1271,292 @@ document.querySelectorAll('.cancel-reason-btn').forEach(btn => {
     toast('Removed: ' + reason);
   });
 });
+
+/* ===== CALENDAR ===== */
+let calYear = now.getFullYear(), calMonth = now.getMonth(), calSelectedDay = null;
+
+// Insert calendar page HTML dynamically
+(function(){
+  const calPage = document.createElement('div');
+  calPage.id = 'cal';
+  calPage.className = 'page';
+  calPage.innerHTML = `
+    <div class="card">
+      <div class="cal-header">
+        <button class="cal-nav-btn" id="cal-prev">‹</button>
+        <div class="cal-month-label" id="cal-month-label"></div>
+        <button class="cal-nav-btn" id="cal-next">›</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div id="cal-detail" style="display:none"></div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--fire);box-shadow:0 0 4px rgba(255,71,87,.5)"></div>Priority 1</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--gold)"></div>Priority 2</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--neon)"></div>Priority 3+</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(255,255,255,.15)"></div>Done</div>
+      </div>
+    </div>
+  `;
+  // Insert before the nav
+  document.querySelector('.nav').before(calPage);
+})();
+
+function renderCalendar() {
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DOW = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+  $('#cal-month-label').textContent = MONTHS[calMonth] + ' ' + calYear;
+
+  const grid = $('#cal-grid');
+  grid.innerHTML = '';
+
+  // Day of week headers
+  DOW.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-dow';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  // Build a map: dateKey -> [hw items due that day]
+  const duemap = {};
+  (load('hw_all', [])).forEach(h => {
+    if (!h.due) return;
+    if (!duemap[h.due]) duemap[h.due] = [];
+    duemap[h.due].push(h);
+  });
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  // Prev month filler
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = daysInPrev - i;
+    const m = calMonth === 0 ? 11 : calMonth - 1;
+    const y = calMonth === 0 ? calYear - 1 : calYear;
+    const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    grid.appendChild(makeDayCell(d, key, true, duemap, todayStr));
+  }
+
+  // Current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    grid.appendChild(makeDayCell(d, key, false, duemap, todayStr));
+  }
+
+  // Next month filler
+  const total = firstDay + daysInMonth;
+  const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let d = 1; d <= remaining; d++) {
+    const m = calMonth === 11 ? 0 : calMonth + 1;
+    const y = calMonth === 11 ? calYear + 1 : calYear;
+    const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    grid.appendChild(makeDayCell(d, key, true, duemap, todayStr));
+  }
+
+  // Re-render selected detail if a day was selected
+  if (calSelectedDay) showCalDetail(calSelectedDay, duemap);
+}
+
+function makeDayCell(dayNum, key, otherMonth, duemap, todayStr) {
+  const hwList = duemap[key] || [];
+  const el = document.createElement('div');
+  el.className = 'cal-day' +
+    (otherMonth ? ' other-month' : '') +
+    (key === todayStr ? ' is-today' : '') +
+    (hwList.length > 0 ? ' has-hw' : '') +
+    (key === calSelectedDay ? ' selected' : '');
+  el.dataset.key = key;
+
+  const numEl = document.createElement('div');
+  numEl.className = 'cal-day-num';
+  numEl.textContent = dayNum;
+  el.appendChild(numEl);
+
+  if (hwList.length > 0) {
+    const dotsEl = document.createElement('div');
+    dotsEl.className = 'cal-dots';
+    // Show up to 6 dots
+    hwList.slice(0, 6).forEach(h => {
+      const dot = document.createElement('div');
+      const isDone = h.status === 'done';
+      dot.className = isDone ? 'cal-dot done' : ('cal-dot ' + (h.pri == 1 ? 'p1' : h.pri == 2 ? 'p2' : 'p3'));
+      dotsEl.appendChild(dot);
+    });
+    if (hwList.length > 6) {
+      const more = document.createElement('div');
+      more.style.cssText = 'font-size:8px;font-weight:800;color:var(--text3);width:100%;text-align:center;line-height:1';
+      more.textContent = '+' + (hwList.length - 6);
+      dotsEl.appendChild(more);
+    }
+    el.appendChild(dotsEl);
+  }
+
+  el.addEventListener('click', () => {
+    calSelectedDay = (calSelectedDay === key) ? null : key;
+    $$('.cal-day').forEach(d => d.classList.remove('selected'));
+    if (calSelectedDay) el.classList.add('selected');
+    // Rebuild duemap for detail
+    const dm = {};
+    (load('hw_all', [])).forEach(h => { if (h.due) { if (!dm[h.due]) dm[h.due] = []; dm[h.due].push(h); } });
+    showCalDetail(calSelectedDay, dm);
+  });
+
+  return el;
+}
+
+function showCalDetail(key, duemap) {
+  const det = $('#cal-detail');
+  if (!key) { det.style.display = 'none'; return; }
+
+  const hwList = duemap[key] || [];
+  const d = new Date(key + 'T12:00:00');
+  const dateLabel = d.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+
+  let html = `<div class="cal-detail"><div class="cal-detail-date">${dateLabel}</div>`;
+  if (hwList.length === 0) {
+    html += `<div class="cal-detail-empty">No assignments due — free day ✨</div>`;
+  } else {
+    // Sort: undone first by priority
+    const sorted = [...hwList].sort((a,b) => {
+      const ad = a.status==='done'?1:0, bd = b.status==='done'?1:0;
+      if (ad !== bd) return ad - bd;
+      return (a.pri||9) - (b.pri||9);
+    });
+    sorted.forEach(h => {
+      const isDone = h.status === 'done';
+      const dotClass = isDone ? 'done' : (h.pri==1?'p1':h.pri==2?'p2':'p3');
+      const dotStyle = isDone ? 'background:rgba(255,255,255,.15)' :
+        (h.pri==1 ? 'background:var(--fire);box-shadow:0 0 6px rgba(255,71,87,.5)' :
+         h.pri==2 ? 'background:var(--gold)' : 'background:var(--neon);box-shadow:0 0 6px rgba(0,229,255,.4)');
+      html += `<div class="cal-detail-item">
+        <div class="cal-detail-dot" style="${dotStyle}"></div>
+        <div class="cal-detail-info">
+          <div class="cal-detail-name${isDone?' done-txt':''}">${esc(h.name||'Untitled')}</div>
+          ${h.subject?`<div class="cal-detail-sub">${esc(h.subject)}${h.pri?` · P${h.pri}`:''}${isDone?' · ✓ Done':''}</div>`:''}
+        </div>
+      </div>`;
+    });
+  }
+  html += '</div>';
+  det.innerHTML = html;
+  det.style.display = 'block';
+}
+
+$('#cal-prev').addEventListener('click', () => {
+  calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
+  calSelectedDay = null; renderCalendar();
+});
+$('#cal-next').addEventListener('click', () => {
+  calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
+  calSelectedDay = null; renderCalendar();
+});
+
+// Re-render calendar when switching to it so it reflects latest HW data
+$$('[data-page="cal"]').forEach(btn => btn.addEventListener('click', () => renderCalendar()));
+
+renderCalendar();
+
+/* ===== HISTORY / LOG ===== */
+(()=>{
+  function renderHistory(){
+    const statsRow = document.getElementById('hist-stats-row');
+    const list = document.getElementById('hist-list');
+    list.innerHTML = '';
+    statsRow.innerHTML = '';
+
+    // Gather all past Big3 date keys (exclude today)
+    const dates = [];
+    for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);
+      if(key && key.startsWith('tg_big3_')){
+        const d=key.replace('tg_big3_','');
+        if(d!==todayKey) dates.push(d);
+      }
+    }
+    dates.sort((a,b)=>b.localeCompare(a)); // newest first
+
+    if(dates.length===0){
+      list.innerHTML='<div class="hist-empty">No past sessions yet.<br>Come back tomorrow 💪</div>';
+      return;
+    }
+
+    // Aggregate stats across all history
+    let totalDays=dates.length, totalB3=0, totalHWDone=0;
+    const hwAll=load('hw_all',[]);
+    dates.forEach(date=>{
+      const b3=load('big3_'+date,null);
+      if(b3) totalB3+=b3.checks.filter(Boolean).length;
+    });
+    totalHWDone=hwAll.filter(h=>h.status==='done').length;
+    const perfectDays=dates.filter(date=>{
+      const b3=load('big3_'+date,null);
+      return b3&&b3.checks.filter(Boolean).length===3;
+    }).length;
+
+    // Stats strip
+    statsRow.innerHTML=`
+      <div class="hist-stat"><div class="hist-stat-num">${totalDays}</div><div class="hist-stat-lbl">Days Logged</div></div>
+      <div class="hist-stat"><div class="hist-stat-num" style="color:var(--gold)">${perfectDays}</div><div class="hist-stat-lbl">Perfect Days</div></div>
+      <div class="hist-stat"><div class="hist-stat-num" style="color:var(--fire)">${totalHWDone}</div><div class="hist-stat-lbl">HW Done</div></div>
+    `;
+
+    // Day entries
+    dates.forEach(date=>{
+      const b3=load('big3_'+date,null);
+      if(!b3) return;
+
+      const d=new Date(date+'T12:00:00');
+      const dayLabel=d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+      const doneCount=b3.checks.filter(Boolean).length;
+      const badgeCls=doneCount===3?'gold':doneCount>0?'cyan':'dim';
+      const badgeTxt=doneCount===3?'✓ All 3':doneCount+'/3';
+
+      // HW due that day
+      const hwDue=hwAll.filter(h=>h.due===date);
+
+      const entry=document.createElement('div');
+      entry.className='hist-entry';
+
+      // Big 3 items
+      const b3HTML=b3.items.map((item,i)=>{
+        if(!item) return `<div class="hist-b3-item skipped"><span class="hist-check">—</span><span class="hist-b3-text">Not set</span></div>`;
+        const cls=b3.checks[i]?'done':'';
+        const icon=b3.checks[i]?'✅':'⬜';
+        return `<div class="hist-b3-item ${cls}"><span class="hist-check">${icon}</span><span class="hist-b3-text">${item}</span></div>`;
+      }).join('');
+
+      // HW block
+      let hwHTML='';
+      if(hwDue.length){
+        const hwItems=hwDue.map(h=>{
+          const isDone=h.status==='done';
+          return `<div class="hist-hw-item ${isDone?'done':''}">
+            <span>${isDone?'✅':'📌'}</span>
+            <span class="hist-hw-name">${h.name||'Untitled'}</span>
+            ${h.subject?`<span class="hist-hw-sub">${h.subject}</span>`:''}
+          </div>`;
+        }).join('');
+        hwHTML=`<div class="hist-hw-block"><div class="hist-hw-lbl">HW due this day</div>${hwItems}</div>`;
+      }
+
+      entry.innerHTML=`
+        <div class="hist-date-row">
+          <div class="hist-date">${dayLabel}</div>
+          <div class="hist-b3-badge ${badgeCls}">${badgeTxt}</div>
+        </div>
+        ${b3HTML}
+        ${hwHTML}
+      `;
+      list.appendChild(entry);
+    });
+  }
+
+  // Render whenever Log tab is opened
+  $$('[data-page="history"]').forEach(btn=>btn.addEventListener('click',renderHistory));
+})();
 </script>
 </body>
 </html>

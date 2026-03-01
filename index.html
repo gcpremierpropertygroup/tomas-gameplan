@@ -1037,6 +1037,7 @@ function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
 $('#hw-add-btn').addEventListener('click',()=>{
   const name=$('#hw-f-name').value.trim();
   if(!name){toast('Enter assignment name');$('#hw-f-name').focus();return}
+  if(!$('#hw-f-due').value){toast('Set a due date ⚠️');$('#hw-f-due').focus();return}
   const hw={
     name:name,
     subject:$('#hw-f-subject').value,

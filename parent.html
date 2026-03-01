@@ -29,29 +29,76 @@ body{
     radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,229,255,.04) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 80% 100%, rgba(168,85,247,.03) 0%, transparent 50%);
 }
+
 .header{padding:24px 20px 16px;display:flex;align-items:center;gap:14px}
-.header-icon{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--neon),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:#fff;box-shadow:0 4px 20px rgba(0,229,255,.25)}
+.header-icon{
+  width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(135deg,var(--neon),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:#fff;
+  box-shadow:0 4px 20px rgba(0,229,255,.25);
+}
 .header h1{font-size:22px;font-weight:700;letter-spacing:-.02em}
 .header .sub{font-size:13px;color:var(--text2);margin-top:2px}
+
 .sync-bar{padding:0 20px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--mint);animation:pulse 2s ease infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .sync-text{font-size:12px;color:var(--text2)}
-.refresh-btn{margin-left:auto;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s}
+.refresh-btn{
+  margin-left:auto;padding:6px 14px;border-radius:20px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text2);font-size:12px;font-family:inherit;cursor:pointer;transition:all .2s;
+}
 .refresh-btn:hover{background:var(--surface2);color:var(--text)}
 .refresh-btn:active{transform:scale(.96)}
+
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px;margin-bottom:20px}
-.stat-card{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:14px;padding:14px 10px;text-align:center}
+.stat-card{
+  background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);border-radius:14px;padding:14px 10px;text-align:center;
+}
 .stat-num{font-size:28px;font-weight:800;font-family:'Space Mono',monospace;line-height:1}
 .stat-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-top:6px}
 .stat-overdue .stat-num{color:var(--fire)}
 .stat-pending .stat-num{color:var(--gold)}
 .stat-progress .stat-num{color:var(--neon)}
 .stat-done .stat-num{color:var(--mint)}
+
 .section{padding:0 16px;margin-bottom:24px}
-.section-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title{
+  font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
 .section-title .dot{width:6px;height:6px;border-radius:50%}
-.hw-card{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;margin-bottom:10px;transition:transform .15s,border-color .2s;position:relative;overflow:hidden}
+
+/* Big 3 Card */
+.big3-card{
+  background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);border-radius:var(--radius);padding:18px;
+}
+.big3-date{font-size:11px;color:var(--text3);margin-bottom:14px;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.big3-item{
+  display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.big3-item:last-child{border-bottom:none}
+.big3-num{
+  width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;font-family:'Space Mono',monospace;flex-shrink:0;
+}
+.big3-num.n1{background:rgba(255,71,87,.15);color:var(--fire)}
+.big3-num.n2{background:rgba(255,195,18,.12);color:var(--gold)}
+.big3-num.n3{background:rgba(0,229,255,.08);color:var(--neon)}
+.big3-text{font-size:14px;font-weight:500;flex:1;line-height:1.3}
+.big3-check{font-size:16px;flex-shrink:0}
+.big3-empty{font-size:13px;color:var(--text3);text-align:center;padding:20px 0}
+
+/* HW Cards */
+.hw-card{
+  background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;
+  margin-bottom:10px;position:relative;overflow:hidden;
+}
 .hw-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
 .hw-card.overdue::before{background:var(--fire)}
 .hw-card.pending::before{background:var(--gold)}
@@ -67,6 +114,8 @@ body{
 .badge-done{background:var(--mint-glow);color:var(--mint);border:1px solid rgba(11,232,129,.2)}
 .hw-meta{display:flex;gap:12px;flex-wrap:wrap}
 .hw-meta span{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px}
+
+/* Activity Feed */
 .activity-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
 .activity-item:last-child{border-bottom:none}
 .activity-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
@@ -74,29 +123,30 @@ body{
 .activity-icon.completed{background:var(--gold-glow);color:var(--gold)}
 .activity-icon.deleted{background:var(--fire-glow);color:var(--fire)}
 .activity-icon.status_change{background:var(--neon-soft);color:var(--neon)}
-.activity-icon.current{background:var(--purple-glow);color:var(--purple)}
+.activity-icon.other{background:var(--surface2);color:var(--text2)}
 .activity-text{flex:1;font-size:13px;line-height:1.4}
 .activity-text strong{font-weight:600}
 .activity-time{font-size:11px;color:var(--text3);margin-top:2px}
+
 .empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
 .empty-state .icon{font-size:48px;margin-bottom:16px}
 .empty-state p{font-size:14px;line-height:1.5}
+
 .loading{text-align:center;padding:80px 20px}
 .spinner{width:40px;height:40px;border:3px solid var(--surface3);border-top-color:var(--neon);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading p{color:var(--text2);font-size:14px}
+
 .error-state{text-align:center;padding:60px 20px;color:var(--fire)}
 .error-state p{font-size:14px;margin-top:8px;color:var(--text2)}
-.setup-card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;margin:20px 16px;text-align:center}
-.setup-card p{font-size:14px;color:var(--text2);margin-bottom:16px;line-height:1.5}
-.setup-card input{width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:14px;margin-bottom:12px;outline:none}
-.setup-card input:focus{border-color:var(--neon)}
-.setup-card button{width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--neon),var(--purple));color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer}
+
 .bottom-spacer{height:40px}
+
 @media(max-width:400px){.stats{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
+
 <div class="header">
   <div class="header-icon">TG</div>
   <div>
@@ -104,68 +154,133 @@ body{
     <div class="sub">Parent Dashboard</div>
   </div>
 </div>
+
 <div class="sync-bar">
   <div class="sync-dot" id="syncDot"></div>
   <span class="sync-text" id="syncText">Connecting...</span>
   <button class="refresh-btn" onclick="fetchData()">Refresh</button>
 </div>
+
 <div id="app">
   <div class="loading">
     <div class="spinner"></div>
-    <p>Loading homework data...</p>
+    <p>Loading...</p>
   </div>
 </div>
+
 <div class="bottom-spacer"></div>
+
 <script>
 const SCRIPT_URL = localStorage.getItem('tg_parent_url') || 'https://script.google.com/macros/s/AKfycbz_eRMrzLYxS90D_k9gAaMHfLCs0mpyr0VLvPluT-WmbIKztTLU_EUmzVK8Wc27wkQ/exec';
+
 function $(s){return document.querySelector(s)}
+
 function getStatusInfo(hw) {
   const today = new Date().toISOString().slice(0,10);
   const status = (hw.status || 'not-started').toLowerCase();
   if (status === 'done') return {cls:'done', badge:'Done', badgeCls:'badge-done'};
   if (status === 'in-progress') return {cls:'in-progress', badge:'In Progress', badgeCls:'badge-in-progress'};
-  if (hw.due && hw.due < today && status !== 'done') return {cls:'overdue', badge:'Overdue', badgeCls:'badge-overdue'};
+  if (hw.due && hw.due < today) return {cls:'overdue', badge:'Overdue', badgeCls:'badge-overdue'};
   return {cls:'pending', badge:'To Do', badgeCls:'badge-pending'};
 }
+
 function formatDue(due) {
-  if (!due) return '';
+  if (!due || due === 'Invalid Date') return '';
   try {
     const d = new Date(due + 'T00:00:00');
+    if (isNaN(d.getTime())) return '';
     const today = new Date(); today.setHours(0,0,0,0);
     const diff = Math.round((d - today) / 86400000);
     if (diff < 0) return Math.abs(diff) + 'd overdue';
     if (diff === 0) return 'Today';
     if (diff === 1) return 'Tomorrow';
     return d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
-  } catch(e) { return due; }
+  } catch(e) { return ''; }
 }
+
+function formatTime(ts) {
+  if (!ts) return '';
+  try {
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+    const itemDay = new Date(d); itemDay.setHours(0,0,0,0);
+    const timeStr = d.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', hour12:true});
+    if (itemDay.getTime() === today.getTime()) return 'Today at ' + timeStr;
+    if (itemDay.getTime() === yesterday.getTime()) return 'Yesterday at ' + timeStr;
+    return d.toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ' at ' + timeStr;
+  } catch(e) { return ''; }
+}
+
 function actionIcon(action) {
   if (action === 'added') return '+';
-  if (action === 'completed') return '\u2713';
-  if (action === 'deleted') return '\u2717';
-  if (action === 'status_change') return '\u21BB';
-  return '\u2022';
+  if (action === 'completed') return '✓';
+  if (action === 'deleted') return '✕';
+  if (action === 'status_change') return '↻';
+  return '•';
 }
+
 function actionText(item) {
-  const name = '<strong>' + (item.name || 'Unknown') + '</strong>';
+  const name = '<strong>' + escHtml(item.name || 'Unknown') + '</strong>';
   if (item.action === 'added') return name + ' was added';
   if (item.action === 'completed') return name + ' marked complete';
   if (item.action === 'deleted') return name + ' was removed';
-  if (item.action === 'status_change') return name + ' status changed to ' + (item.status || '');
-  return name + ' synced';
+  if (item.action === 'status_change') return name + ' → ' + escHtml(item.status || '');
+  return name + ' updated';
 }
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderBig3(dailyGoals) {
+  const todayKey = new Date().toISOString().slice(0,10);
+  // Find today's goals - dailyGoals is array of {date, goal1, goal2, goal3, checks}
+  const todayGoals = (dailyGoals || []).find(g => g.date === todayKey);
+
+  let html = '<div class="section">';
+  html += '<div class="section-title"><span class="dot" style="background:var(--purple)"></span>Today\'s Big 3</div>';
+  html += '<div class="big3-card">';
+
+  if (!todayGoals) {
+    html += '<div class="big3-empty">No goals set yet today</div>';
+  } else {
+    const goals = [todayGoals.goal1, todayGoals.goal2, todayGoals.goal3];
+    const checks = todayGoals.checks ? String(todayGoals.checks).split('') : [];
+    const numClasses = ['n1','n2','n3'];
+    goals.forEach((g, i) => {
+      if (!g) return;
+      const done = checks[i] === '1';
+      html += '<div class="big3-item">';
+      html += '<div class="big3-num ' + numClasses[i] + '">' + (i+1) + '</div>';
+      html += '<div class="big3-text" style="' + (done ? 'text-decoration:line-through;opacity:.5' : '') + '">' + escHtml(g) + '</div>';
+      html += '<div class="big3-check">' + (done ? '✅' : '⬜') + '</div>';
+      html += '</div>';
+    });
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
 function renderDashboard(data) {
   const hw = data.homework || [];
-  const activity = data.activity || [];
+  const activity = (data.activity || []).filter(a => {
+    // Filter out big3_locked events — they have their own section
+    return a.action !== 'big3_locked';
+  });
+  const dailyGoals = data.dailyGoals || [];
+
   const today = new Date().toISOString().slice(0,10);
   let overdue=0, pending=0, inProgress=0, done=0;
   hw.forEach(h => {
     const s = (h.status||'not-started').toLowerCase();
     if (s === 'done') { done++; return; }
-    if (s === 'in-progress') { inProgress++; }
-    else { pending++; }
-    if (h.due && h.due < today && s !== 'done') overdue++;
+    if (s === 'in-progress') inProgress++; else pending++;
+    if (h.due && h.due < today) overdue++;
   });
+
   const sorted = [...hw].filter(h => (h.status||'').toLowerCase() !== 'done')
     .sort((a,b) => {
       const aOver = a.due && a.due < today ? 0 : 1;
@@ -174,84 +289,126 @@ function renderDashboard(data) {
       return (a.due||'9999') < (b.due||'9999') ? -1 : 1;
     });
   const completed = hw.filter(h => (h.status||'').toLowerCase() === 'done');
+
   let html = '';
+
+  // Stats
   html += '<div class="stats">';
   html += '<div class="stat-card stat-overdue"><div class="stat-num">' + overdue + '</div><div class="stat-label">Overdue</div></div>';
   html += '<div class="stat-card stat-pending"><div class="stat-num">' + pending + '</div><div class="stat-label">To Do</div></div>';
   html += '<div class="stat-card stat-progress"><div class="stat-num">' + inProgress + '</div><div class="stat-label">Doing</div></div>';
   html += '<div class="stat-card stat-done"><div class="stat-num">' + done + '</div><div class="stat-label">Done</div></div>';
   html += '</div>';
+
+  // Today's Big 3
+  html += renderBig3(dailyGoals);
+
+  // Active assignments
   if (sorted.length > 0) {
-    html += '<div class="section"><div class="section-title"><span class="dot" style="background:var(--gold)"></span>Active Assignments</div>';
+    html += '<div class="section">';
+    html += '<div class="section-title"><span class="dot" style="background:var(--gold)"></span>Active Assignments</div>';
     sorted.forEach(h => {
       const info = getStatusInfo(h);
-      html += '<div class="hw-card ' + info.cls + '"><div class="hw-card-top"><div class="hw-name">' + (h.name||'Untitled') + '</div>';
+      const dueTxt = formatDue(h.due);
+      html += '<div class="hw-card ' + info.cls + '">';
+      html += '<div class="hw-card-top"><div class="hw-name">' + escHtml(h.name||'Untitled') + '</div>';
       html += '<span class="hw-badge ' + info.badgeCls + '">' + info.badge + '</span></div>';
       html += '<div class="hw-meta">';
-      if (h.subject) html += '<span>\uD83D\uDCDA ' + h.subject + '</span>';
-      if (h.due) html += '<span>\uD83D\uDCC5 ' + formatDue(h.due) + '</span>';
-      if (h.priority) html += '<span>\u26A1 ' + h.priority + '</span>';
+      if (h.subject) html += '<span>📚 ' + escHtml(h.subject) + '</span>';
+      if (dueTxt) html += '<span>📅 ' + dueTxt + '</span>';
+      if (h.priority) html += '<span>⚡ ' + escHtml(h.priority) + '</span>';
       html += '</div></div>';
     });
     html += '</div>';
   }
+
+  // Completed
   if (completed.length > 0) {
-    html += '<div class="section"><div class="section-title"><span class="dot" style="background:var(--mint)"></span>Completed (' + completed.length + ')</div>';
+    html += '<div class="section">';
+    html += '<div class="section-title"><span class="dot" style="background:var(--mint)"></span>Completed (' + completed.length + ')</div>';
     completed.forEach(h => {
-      const info = getStatusInfo(h);
-      html += '<div class="hw-card done"><div class="hw-card-top"><div class="hw-name">' + (h.name||'Untitled') + '</div>';
+      html += '<div class="hw-card done">';
+      html += '<div class="hw-card-top"><div class="hw-name">' + escHtml(h.name||'Untitled') + '</div>';
       html += '<span class="hw-badge badge-done">Done</span></div>';
       html += '<div class="hw-meta">';
-      if (h.subject) html += '<span>\uD83D\uDCDA ' + h.subject + '</span>';
+      if (h.subject) html += '<span>📚 ' + escHtml(h.subject) + '</span>';
       html += '</div></div>';
     });
     html += '</div>';
   }
+
+  // Activity Feed — homework events only
   if (activity.length > 0) {
-    html += '<div class="section"><div class="section-title"><span class="dot" style="background:var(--purple)"></span>Recent Activity</div>';
-    activity.slice(0, 15).forEach(item => {
-      const action = (item.action||'update').toLowerCase();
-      html += '<div class="activity-item"><div class="activity-icon ' + action + '">' + actionIcon(action) + '</div>';
+    html += '<div class="section">';
+    html += '<div class="section-title"><span class="dot" style="background:var(--neon)"></span>Recent Activity</div>';
+    activity.slice(0,12).forEach(item => {
+      const action = (item.action||'other').toLowerCase();
+      const iconCls = ['added','completed','deleted','status_change'].includes(action) ? action : 'other';
+      html += '<div class="activity-item">';
+      html += '<div class="activity-icon ' + iconCls + '">' + actionIcon(action) + '</div>';
       html += '<div><div class="activity-text">' + actionText(item) + '</div>';
-      html += '<div class="activity-time">' + (item.timestamp || '') + '</div></div></div>';
+      html += '<div class="activity-time">' + formatTime(item.timestamp) + '</div></div>';
+      html += '</div>';
     });
     html += '</div>';
   }
-  if (hw.length === 0 && activity.length === 0) {
-    html += '<div class="empty-state"><div class="icon">\uD83D\uDCCB</div>';
-    html += '<p>No homework tracked yet.<br>Assignments will appear here when Tomas adds them.</p></div>';
+
+  if (hw.length === 0 && activity.length === 0 && dailyGoals.length === 0) {
+    html += '<div class="empty-state"><div class="icon">📋</div>';
+    html += '<p>Nothing tracked yet.<br>Data will appear here once Tomas uses the app.</p></div>';
   }
+
   $('#app').innerHTML = html;
 }
+
 async function fetchData() {
   if (!SCRIPT_URL) { showSetup(); return; }
+
   $('#syncDot').style.background = 'var(--gold)';
   $('#syncText').textContent = 'Syncing...';
+
   try {
     const resp = await fetch(SCRIPT_URL);
     const data = await resp.json();
     if (data.status === 'ok') {
       renderDashboard(data);
       $('#syncDot').style.background = 'var(--mint)';
-      $('#syncText').textContent = 'Last updated: ' + (data.fetchedAt || 'just now');
-    } else { showError(data.message || 'Unknown error'); }
+      const d = data.fetchedAt ? new Date(data.fetchedAt) : new Date();
+      const timeStr = isNaN(d.getTime()) ? 'just now' : d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+      $('#syncText').textContent = 'Updated ' + timeStr;
+    } else {
+      showError(data.message || 'Unknown error');
+    }
   } catch(e) {
-    showError('Could not connect. The Apps Script may need redeployment with GET support.');
+    showError('Could not connect. Try refreshing.');
     console.error('Fetch error:', e);
   }
 }
+
 function showError(msg) {
   $('#syncDot').style.background = 'var(--fire)';
   $('#syncText').textContent = 'Connection error';
-  $('#app').innerHTML = '<div class="error-state"><div style="font-size:36px">\u26A0\uFE0F</div><p>' + msg + '</p></div>';
+  $('#app').innerHTML = '<div class="error-state"><div style="font-size:36px">⚠️</div><p>' + escHtml(msg) + '</p></div>';
 }
+
 function showSetup() {
-  $('#app').innerHTML = '<div class="setup-card"><p>Paste your Apps Script URL to connect the parent dashboard.</p><input type="text" id="urlInput" placeholder="https://script.google.com/macros/s/..."><button onclick="saveUrl()">Connect</button></div>';
+  $('#app').innerHTML = `
+    <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px;margin:20px 16px;text-align:center">
+      <p style="font-size:14px;color:var(--text2);margin-bottom:16px;line-height:1.5">Paste your Apps Script URL to connect.</p>
+      <input type="text" id="urlInput" placeholder="https://script.google.com/macros/s/..."
+        style="width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:14px;margin-bottom:12px;outline:none">
+      <button onclick="saveUrl()"
+        style="width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--neon),var(--purple));color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">
+        Connect
+      </button>
+    </div>`;
 }
+
 function saveUrl() {
   const url = document.getElementById('urlInput').value.trim();
   if (url) { localStorage.setItem('tg_parent_url', url); location.reload(); }
 }
+
 setInterval(fetchData, 120000);
 fetchData();
 </script>

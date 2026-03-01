@@ -345,6 +345,18 @@ select.hw-f-input{
 .hw-action-btn.cal:hover{color:var(--neon);background:var(--neon-soft);box-shadow:0 0 12px rgba(0,229,255,.1)}
 .hw-action-btn.del:hover{color:var(--fire);background:var(--fire-glow)}
 
+/* Cancel modal */
+.cancel-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:600;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);align-items:flex-end;justify-content:center}
+.cancel-overlay.open{display:flex}
+.cancel-sheet{width:100%;max-width:480px;background:#0f0f1e;border:1px solid rgba(255,255,255,.08);border-radius:24px 24px 0 0;padding:20px 16px 36px;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.cancel-sheet h3{font-size:14px;font-weight:800;color:var(--text);text-align:center;margin-bottom:4px}
+.cancel-sheet .cancel-sub{font-size:12px;color:var(--text3);text-align:center;margin-bottom:18px}
+.cancel-reason-btn{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px 16px;margin-bottom:8px;color:var(--text);font-family:inherit;font-size:14px;font-weight:500;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s}
+.cancel-reason-btn:active{transform:scale(.97);background:rgba(255,71,87,.1);border-color:rgba(255,71,87,.3)}
+.cancel-reason-icon{font-size:20px;flex-shrink:0}
+.cancel-dismiss{width:100%;background:none;border:none;color:var(--text3);font-family:inherit;font-size:13px;padding:14px;cursor:pointer;margin-top:4px}
+
 .hw-empty{text-align:center;padding:48px 20px;color:var(--text3);font-size:14px;font-weight:500}
 .hw-empty-icon{font-size:56px;margin-bottom:14px;display:block;opacity:.4}
 
@@ -649,6 +661,20 @@ select.hw-f-input{
 
 <div class="toast" id="toast">Saved</div>
 <div class="motiv-flash" id="motiv"></div>
+
+<!-- Cancel HW modal -->
+<div id="cancel-overlay" class="cancel-overlay">
+  <div class="cancel-sheet">
+    <h3>Why are you removing this?</h3>
+    <div class="cancel-sub" id="cancel-hw-name"></div>
+    <button class="cancel-reason-btn" data-reason="Teacher cancelled it"><span class="cancel-reason-icon">👩‍🏫</span>Teacher cancelled it</button>
+    <button class="cancel-reason-btn" data-reason="Already turned it in"><span class="cancel-reason-icon">✅</span>Already turned it in</button>
+    <button class="cancel-reason-btn" data-reason="Entered by mistake"><span class="cancel-reason-icon">✏️</span>Entered by mistake</button>
+    <button class="cancel-reason-btn" data-reason="Wrong class"><span class="cancel-reason-icon">📚</span>Wrong class</button>
+    <button class="cancel-reason-btn" data-reason="Due date changed"><span class="cancel-reason-icon">📅</span>Due date changed</button>
+    <button class="cancel-dismiss" id="cancel-dismiss">Never mind</button>
+  </div>
+</div>
 
 <!-- Settings overlay (long-press avatar to open) -->
 <div id="settings-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;
@@ -1028,9 +1054,15 @@ function renderHW(){
   });
   container.querySelectorAll('.hw-action-btn.del').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      const removed=hwData[parseInt(btn.dataset.idx)];
-      hwData.splice(parseInt(btn.dataset.idx),1);
-      save('hw_all',hwData);syncToSheet('deleted',removed);fullSync();renderHW();toast('Removed');
+      const idx=parseInt(btn.dataset.idx);
+      const hw=hwData[idx];
+      const ageMs=Date.now()-(hw.addedAt||0);
+      if(ageMs<120000){
+        // Within 2 min — silent delete, no reason needed
+        hwData.splice(idx,1);save('hw_all',hwData);fullSync();renderHW();toast('Removed');
+      } else {
+        showCancelModal(idx);
+      }
     });
   });
 }
@@ -1047,7 +1079,8 @@ $('#hw-add-btn').addEventListener('click',()=>{
     due:$('#hw-f-due').value,
     pri:$('#hw-f-pri').value,
     status:'not-started',
-    added:todayKey
+    added:todayKey,
+    addedAt:Date.now()
   };
   hwData.push(hw);
   save('hw_all',hwData);
@@ -1137,6 +1170,35 @@ $('#save-sync-url').addEventListener('click',()=>{
 
 /* Auto-sync on page load if URL configured */
 if(APPS_SCRIPT_URL){setTimeout(fullSync,2000)}
+/* ===== CANCEL MODAL ===== */
+let _cancelIdx = null;
+function showCancelModal(idx){
+  _cancelIdx = idx;
+  const hw = hwData[idx];
+  $('#cancel-hw-name').textContent = hw.name || 'this assignment';
+  $('#cancel-overlay').classList.add('open');
+}
+function closeCancelModal(){ $('#cancel-overlay').classList.remove('open'); _cancelIdx=null; }
+
+$('#cancel-dismiss').addEventListener('click', closeCancelModal);
+$('#cancel-overlay').addEventListener('click', e => { if(e.target===$('#cancel-overlay')) closeCancelModal(); });
+
+document.querySelectorAll('.cancel-reason-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(_cancelIdx===null) return;
+    const reason = btn.dataset.reason;
+    const hw = hwData[_cancelIdx];
+    const cancelled = {...hw, reason, cancelledAt: new Date().toISOString()};
+    hwData.splice(_cancelIdx, 1);
+    save('hw_all', hwData);
+    // Sync cancellation to sheet
+    syncToSheet('cancelled', cancelled);
+    fullSync();
+    renderHW();
+    closeCancelModal();
+    toast('Removed: ' + reason);
+  });
+});
 </script>
 </body>
 </html>

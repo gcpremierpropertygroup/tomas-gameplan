@@ -93,21 +93,36 @@ body{
 .big3-check{font-size:16px;flex-shrink:0}
 .big3-empty{font-size:13px;color:var(--text3);text-align:center;padding:20px 0}
 
+/* Day Group */
+.day-group{margin-bottom:18px}
+.day-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;
+}
+.day-label{
+  font-size:13px;font-weight:700;letter-spacing:.02em;
+}
+.day-label.overdue-day{color:var(--fire)}
+.day-label.today-day{color:var(--neon)}
+.day-label.future-day{color:var(--text)}
+.day-line{flex:1;height:1px;background:var(--border)}
+.day-count{font-size:11px;color:var(--text3);font-weight:600}
+
 /* HW Cards */
 .hw-card{
   background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;
-  margin-bottom:10px;position:relative;overflow:hidden;
+  border:1px solid var(--glass-border);border-radius:14px;padding:14px 16px;
+  margin-bottom:8px;display:flex;align-items:center;gap:12px;
 }
-.hw-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
-.hw-card.overdue::before{background:var(--fire)}
-.hw-card.pending::before{background:var(--gold)}
-.hw-card.in-progress::before{background:var(--neon)}
-.hw-card.done::before{background:var(--mint)}
-.hw-card.done{opacity:.5}
-.hw-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.hw-name{font-size:15px;font-weight:600;line-height:1.3;flex:1;padding-right:8px}
-.hw-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.hw-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.hw-status-dot.overdue{background:var(--fire);box-shadow:0 0 6px rgba(255,71,87,.4)}
+.hw-status-dot.pending{background:var(--gold)}
+.hw-status-dot.in-progress{background:var(--neon);box-shadow:0 0 6px rgba(0,229,255,.3)}
+.hw-status-dot.done{background:var(--mint)}
+.hw-card-body{flex:1;min-width:0}
+.hw-name{font-size:14px;font-weight:600;line-height:1.3}
+.hw-name.done-name{text-decoration:line-through;opacity:.45}
+.hw-meta{font-size:11px;color:var(--text2);margin-top:3px}
+.hw-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0}
 .badge-overdue{background:var(--fire-glow);color:var(--fire);border:1px solid rgba(255,71,87,.2)}
 .badge-pending{background:var(--gold-glow);color:var(--gold);border:1px solid rgba(255,195,18,.2)}
 .badge-in-progress{background:var(--neon-soft);color:var(--neon);border:1px solid rgba(0,229,255,.15)}
@@ -281,14 +296,7 @@ function renderDashboard(data) {
     if (h.due && h.due < today) overdue++;
   });
 
-  const sorted = [...hw].filter(h => (h.status||'').toLowerCase() !== 'done')
-    .sort((a,b) => {
-      const aOver = a.due && a.due < today ? 0 : 1;
-      const bOver = b.due && b.due < today ? 0 : 1;
-      if (aOver !== bOver) return aOver - bOver;
-      return (a.due||'9999') < (b.due||'9999') ? -1 : 1;
-    });
-  const completed = hw.filter(h => (h.status||'').toLowerCase() === 'done');
+
 
   let html = '';
 
@@ -303,37 +311,76 @@ function renderDashboard(data) {
   // Today's Big 3
   html += renderBig3(dailyGoals);
 
-  // Active assignments
-  if (sorted.length > 0) {
-    html += '<div class="section">';
-    html += '<div class="section-title"><span class="dot" style="background:var(--gold)"></span>Active Assignments</div>';
-    sorted.forEach(h => {
-      const info = getStatusInfo(h);
-      const dueTxt = formatDue(h.due);
-      html += '<div class="hw-card ' + info.cls + '">';
-      html += '<div class="hw-card-top"><div class="hw-name">' + escHtml(h.name||'Untitled') + '</div>';
-      html += '<span class="hw-badge ' + info.badgeCls + '">' + info.badge + '</span></div>';
-      html += '<div class="hw-meta">';
-      if (h.subject) html += '<span>📚 ' + escHtml(h.subject) + '</span>';
-      if (dueTxt) html += '<span>📅 ' + dueTxt + '</span>';
-      if (h.priority) html += '<span>⚡ ' + escHtml(h.priority) + '</span>';
-      html += '</div></div>';
+  // Homework grouped by due date
+  if (hw.length > 0) {
+    // Group all hw by due date
+    const groups = {};
+    hw.forEach(h => {
+      const key = h.due || 'no-date';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(h);
     });
-    html += '</div>';
-  }
+    // Sort keys: overdue first, then ascending, no-date last
+    const sortedKeys = Object.keys(groups).sort((a,b) => {
+      if (a === 'no-date') return 1;
+      if (b === 'no-date') return -1;
+      return a < b ? -1 : 1;
+    });
 
-  // Completed
-  if (completed.length > 0) {
     html += '<div class="section">';
-    html += '<div class="section-title"><span class="dot" style="background:var(--mint)"></span>Completed (' + completed.length + ')</div>';
-    completed.forEach(h => {
-      html += '<div class="hw-card done">';
-      html += '<div class="hw-card-top"><div class="hw-name">' + escHtml(h.name||'Untitled') + '</div>';
-      html += '<span class="hw-badge badge-done">Done</span></div>';
-      html += '<div class="hw-meta">';
-      if (h.subject) html += '<span>📚 ' + escHtml(h.subject) + '</span>';
-      html += '</div></div>';
+    html += '<div class="section-title"><span class="dot" style="background:var(--gold)"></span>Homework by Day</div>';
+
+    sortedKeys.forEach(key => {
+      const items = groups[key];
+      const isNoDate = key === 'no-date';
+      const isOverdue = !isNoDate && key < today;
+      const isToday = key === today;
+
+      // Day header label
+      let dayLabel = 'No Due Date';
+      if (!isNoDate) {
+        const d = new Date(key + 'T12:00:00');
+        const diff = Math.round((d - new Date(today + 'T12:00:00')) / 86400000);
+        if (diff < 0) dayLabel = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' — ' + Math.abs(diff) + 'd overdue';
+        else if (diff === 0) dayLabel = 'Today — ' + d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+        else if (diff === 1) dayLabel = 'Tomorrow — ' + d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+        else dayLabel = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      }
+
+      const labelCls = isOverdue ? 'overdue-day' : isToday ? 'today-day' : 'future-day';
+      const doneCount = items.filter(h => (h.status||'').toLowerCase() === 'done').length;
+
+      html += '<div class="day-group">';
+      html += '<div class="day-header">';
+      html += '<div class="day-label ' + labelCls + '">' + dayLabel + '</div>';
+      html += '<div class="day-line"></div>';
+      html += '<div class="day-count">' + doneCount + '/' + items.length + ' done</div>';
+      html += '</div>';
+
+      // Sort within day: not-done first, done last
+      const dayItems = [...items].sort((a,b) => {
+        const aDone = (a.status||'').toLowerCase() === 'done' ? 1 : 0;
+        const bDone = (b.status||'').toLowerCase() === 'done' ? 1 : 0;
+        return aDone - bDone;
+      });
+
+      dayItems.forEach(h => {
+        const info = getStatusInfo(h);
+        const isDone = info.cls === 'done';
+        html += '<div class="hw-card">';
+        html += '<div class="hw-status-dot ' + info.cls + '"></div>';
+        html += '<div class="hw-card-body">';
+        html += '<div class="hw-name' + (isDone ? ' done-name' : '') + '">' + escHtml(h.name||'Untitled') + '</div>';
+        const meta = [h.subject ? '📚 '+escHtml(h.subject) : '', h.priority ? '⚡ '+escHtml(h.priority) : ''].filter(Boolean).join(' · ');
+        if (meta) html += '<div class="hw-meta">' + meta + '</div>';
+        html += '</div>';
+        html += '<span class="hw-badge ' + info.badgeCls + '">' + info.badge + '</span>';
+        html += '</div>';
+      });
+
+      html += '</div>';
     });
+
     html += '</div>';
   }
 

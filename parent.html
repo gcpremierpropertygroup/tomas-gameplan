@@ -384,6 +384,30 @@ function renderDashboard(data) {
     html += '</div>';
   }
 
+  // Cancelled HW log
+  const cancelled = data.cancelled || [];
+  if (cancelled.length > 0) {
+    html += '<div class="section">';
+    html += '<div class="section-title"><span class="dot" style="background:var(--fire)"></span>Cancelled (' + cancelled.length + ')</div>';
+    cancelled.forEach(h => {
+      html += '<div class="hw-card" style="opacity:.7">';
+      html += '<div class="hw-status-dot" style="background:var(--fire)"></div>';
+      html += '<div class="hw-card-body">';
+      html += '<div class="hw-name done-name">' + escHtml(h.name||'Untitled') + '</div>';
+      const meta = [
+        h.subject ? '📚 '+escHtml(h.subject) : '',
+        h.due ? '📅 Due '+formatDue(h.due) : '',
+        h.reason ? '💬 '+escHtml(h.reason) : ''
+      ].filter(Boolean).join(' · ');
+      if (meta) html += '<div class="hw-meta">' + meta + '</div>';
+      html += '<div class="hw-meta" style="margin-top:2px;color:var(--text3)">' + formatTime(h.timestamp) + '</div>';
+      html += '</div>';
+      html += '<span class="hw-badge badge-overdue">Cancelled</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
   // Activity Feed — homework events only
   if (activity.length > 0) {
     html += '<div class="section">';

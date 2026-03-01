@@ -593,7 +593,7 @@ select.hw-f-input{
 
 <div class="page" id="score">
   <div class="card">
-    <div class="card-label">🏆 This Week</div>
+    <div class="card-label">🏆 Week of <span id="week-label"></span></div>
     <div class="score-week">
       <div class="score-day-row">
         <div></div>
@@ -747,6 +747,9 @@ function load(k,d){try{const v=localStorage.getItem('tg_'+k);return v?JSON.parse
 function toast(m){const t=$('#toast');t.textContent=m||'Saved ✓';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
 function weekKey(){const d=new Date(),day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1);return new Date(d.setDate(diff)).toISOString().slice(0,10)}
 const todayKey=new Date().toISOString().slice(0,10),wk=weekKey();
+(()=>{const mon=new Date(wk+'T12:00:00'),sun=new Date(wk+'T12:00:00');sun.setDate(mon.getDate()+6);
+const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+const el=document.getElementById('week-label');if(el)el.textContent=fmt(mon)+' – '+fmt(sun);})();
 
 /* XP System */
 const XP_PER_CHECK=15, XP_PER_HW_DONE=10, XP_PER_SCORE=20;

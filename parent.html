@@ -409,7 +409,14 @@ function saveUrl() {
   if (url) { localStorage.setItem('tg_parent_url', url); location.reload(); }
 }
 
+// Refresh every 2 minutes
 setInterval(fetchData, 120000);
+
+// Refresh when tab becomes visible (user switches back to this tab)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) fetchData();
+});
+
 fetchData();
 </script>
 </body>

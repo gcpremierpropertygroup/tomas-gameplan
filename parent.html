@@ -157,6 +157,25 @@ body{
 
 .bottom-spacer{height:40px}
 
+/* HW Detail Drawer */
+.hw-card{cursor:pointer;transition:all .2s}
+.hw-card:active{transform:scale(.98);background:rgba(255,255,255,.06)}
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:100;opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-overlay.show{opacity:1;pointer-events:all}
+.drawer{position:fixed;bottom:0;left:0;right:0;background:#0f0f1e;border-top:1px solid rgba(255,255,255,.1);border-radius:24px 24px 0 0;z-index:101;padding:0 20px 40px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:85vh;overflow-y:auto}
+.drawer.show{transform:translateY(0)}
+.drawer-handle{width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:12px auto 20px}
+.drawer-subject-badge{display:inline-block;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(168,85,247,.15);color:var(--purple);border:1px solid rgba(168,85,247,.2);margin-bottom:14px;letter-spacing:.5px;text-transform:uppercase}
+.drawer-name{font-size:22px;font-weight:800;line-height:1.25;letter-spacing:-.3px;margin-bottom:18px}
+.drawer-name.done-name{text-decoration:line-through;opacity:.5}
+.drawer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.drawer-cell{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px}
+.drawer-cell-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.drawer-cell-val{font-size:15px;font-weight:700;color:var(--text)}
+.drawer-status-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;margin-bottom:16px}
+.drawer-close{width:100%;padding:14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:transparent;color:var(--text2);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:.3px;transition:all .2s}
+.drawer-close:active{background:rgba(255,255,255,.06)}
+
 @media(max-width:400px){.stats{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -367,14 +386,15 @@ function renderDashboard(data) {
       dayItems.forEach(h => {
         const info = getStatusInfo(h);
         const isDone = info.cls === 'done';
-        html += '<div class="hw-card">';
+        const hwJson = escHtml(JSON.stringify(h));
+        html += '<div class="hw-card" onclick=\'openHWDrawer(' + JSON.stringify(h) + ')\'>';
         html += '<div class="hw-status-dot ' + info.cls + '"></div>';
         html += '<div class="hw-card-body">';
         html += '<div class="hw-name' + (isDone ? ' done-name' : '') + '">' + escHtml(h.name||'Untitled') + '</div>';
         const meta = [h.subject ? '📚 '+escHtml(h.subject) : '', h.priority ? '⚡ '+escHtml(h.priority) : ''].filter(Boolean).join(' · ');
         if (meta) html += '<div class="hw-meta">' + meta + '</div>';
         html += '</div>';
-        html += '<span class="hw-badge ' + info.badgeCls + '">' + info.badge + '</span>';
+        html += '<span class="hw-badge ' + info.badgeCls + '">' + info.badge + ' ›</span>';
         html += '</div>';
       });
 
@@ -489,6 +509,72 @@ document.addEventListener('visibilitychange', () => {
 });
 
 fetchData();
+
+/* ===== HW DETAIL DRAWER ===== */
+(function(){
+  // Inject drawer DOM
+  document.body.insertAdjacentHTML('beforeend', `
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="drawer" id="hwDrawer">
+      <div class="drawer-handle"></div>
+      <div id="drawerContent"></div>
+      <button class="drawer-close" onclick="closeDrawer()">Close</button>
+    </div>
+  `);
+
+  window.openHWDrawer = function(hw) {
+    const isDone = (hw.status||'').toLowerCase() === 'done';
+    const isOverdue = hw.due && hw.due < new Date().toISOString().slice(0,10) && !isDone;
+    const statusColors = {
+      'done':        {bg:'rgba(11,232,129,.1)', color:'var(--mint)',   label:'✅ Done'},
+      'in progress': {bg:'rgba(0,229,255,.08)', color:'var(--neon)',   label:'⚡ In Progress'},
+      'overdue':     {bg:'rgba(255,71,87,.1)',  color:'var(--fire)',   label:'🔴 Overdue'},
+      'to do':       {bg:'rgba(255,195,18,.1)', color:'var(--gold)',   label:'📋 To Do'},
+    };
+    const statusKey = isOverdue ? 'overdue' : (hw.status||'to do').toLowerCase();
+    const sc = statusColors[statusKey] || statusColors['to do'];
+
+    const priLabel = hw.priority == 1 ? '🔴 P1 — Critical' : hw.priority == 2 ? '🟡 P2 — Important' : hw.priority == 3 ? '🟢 P3 — Normal' : '—';
+    const dueLabel = hw.due ? new Date(hw.due + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) : 'No due date set';
+    const addedLabel = hw.added ? new Date(hw.added + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+
+    document.getElementById('drawerContent').innerHTML = `
+      ${hw.subject ? `<div class="drawer-subject-badge">📚 ${escHtml(hw.subject)}</div>` : ''}
+      <div class="drawer-name${isDone?' done-name':''}">${escHtml(hw.name||'Untitled')}</div>
+      <div class="drawer-status-row" style="background:${sc.bg};border:1px solid ${sc.color}22">
+        <span style="font-size:18px">${sc.label.split(' ')[0]}</span>
+        <span style="font-size:14px;font-weight:700;color:${sc.color}">${sc.label.split(' ').slice(1).join(' ')}</span>
+      </div>
+      <div class="drawer-grid">
+        <div class="drawer-cell">
+          <div class="drawer-cell-lbl">Due Date</div>
+          <div class="drawer-cell-val" style="${isOverdue?'color:var(--fire)':''}">${dueLabel}</div>
+        </div>
+        <div class="drawer-cell">
+          <div class="drawer-cell-lbl">Priority</div>
+          <div class="drawer-cell-val">${priLabel}</div>
+        </div>
+        <div class="drawer-cell">
+          <div class="drawer-cell-lbl">Subject</div>
+          <div class="drawer-cell-val">${escHtml(hw.subject||'—')}</div>
+        </div>
+        <div class="drawer-cell">
+          <div class="drawer-cell-lbl">Added</div>
+          <div class="drawer-cell-val">${addedLabel}</div>
+        </div>
+      </div>
+    `;
+    document.getElementById('drawerOverlay').classList.add('show');
+    document.getElementById('hwDrawer').classList.add('show');
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('drawerOverlay').classList.remove('show');
+    document.getElementById('hwDrawer').classList.remove('show');
+  };
+
+  document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+})();
 </script>
 </body>
 </html>

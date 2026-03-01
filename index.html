@@ -1001,11 +1001,22 @@ function renderHW(){
       renderHW();
       if(next==='done'&&!wasDone){
         addXP(XP_PER_HW_DONE);flashMotiv();bumpStreak();toast('Assignment done! +10 XP');
-        // auto-check HW score toggle if ALL assignments are now done
-        const _allDone=hwData.length>0&&hwData.every(h=>h.status==='done');
-        if(_allDone){const _dN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],_dI=[1,2,3,4,5,6,0];
-        const _dn=_dN[_dI.indexOf(now.getDay())],_hwk=_dn+'_hwin';
-        if(!scores[_hwk]){scores[_hwk]=true;save('scores_'+wk,scores);if(typeof renderScores==='function')renderScores();toast('All HW done! Score updated 📋✅');}}
+        // auto-check HW score toggle for the assignment's DUE DATE day
+        const _dueStr=hwData[i].due; // "YYYY-MM-DD"
+        if(_dueStr){
+          // only apply within the current week (Mon–Sun)
+          const _mon=new Date(wk+'T12:00:00'),_sun=new Date(wk+'T12:00:00');
+          _sun.setDate(_mon.getDate()+6);
+          const _due=new Date(_dueStr+'T12:00:00');
+          if(_due>=_mon&&_due<=_sun){
+            const _dN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],_dI=[1,2,3,4,5,6,0];
+            const _dn=_dN[_dI.indexOf(_due.getDay())];
+            // all assignments due on this specific date must be done
+            const _dayDone=hwData.filter(h=>h.due===_dueStr).every(h=>h.status==='done');
+            if(_dayDone){const _hwk=_dn+'_hwin';
+              if(!scores[_hwk]){scores[_hwk]=true;save('scores_'+wk,scores);if(typeof renderScores==='function')renderScores();toast('All '+_dn+' HW done! Score updated 📋✅');}}
+          }
+        }
       }
     });
   });

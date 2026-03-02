@@ -373,6 +373,69 @@ function renderBig3(dailyGoals) {
   return html;
 }
 
+function renderCheckIn(checkIns) {
+  if (!checkIns || !checkIns.length) return '';
+  const ci = checkIns[0];
+  const qs = [
+    {label:'What went well?', val:ci.q1},
+    {label:'Where did he get stuck?', val:ci.q2},
+    {label:'Biggest thing next week?', val:ci.q3},
+    {label:'One thing he\'ll change:', val:ci.q4}
+  ];
+  let html = '<div class="section">';
+  html += '<div class="section-title">Sunday Check-In<span class="section-title-bar"></span></div>';
+  html += '<div style="font-size:11px;color:var(--text3);margin-bottom:14px">Week of ' + escHtml(String(ci.week)) + (ci.savedAt ? ' &nbsp;·&nbsp; Saved ' + formatTime(ci.savedAt) : '') + '</div>';
+  qs.forEach(function(q) {
+    if (!q.val) return;
+    html += '<div style="margin-bottom:14px">';
+    html += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">' + escHtml(q.label) + '</div>';
+    html += '<div style="font-size:13px;color:var(--text);line-height:1.6;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">' + escHtml(String(q.val)) + '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderWeekScores(weeklyScores) {
+  if (!weeklyScores || !weeklyScores.length) return '';
+  const ws = weeklyScores[0];
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const cats = ['big3','power','phone','hwin'];
+  const catLabels = ['Big 3','Power','Phone','HW'];
+  let total = 0;
+  days.forEach(function(d){ cats.forEach(function(c){ if(ws.days[d] && ws.days[d][c]) total++; }); });
+  const pct = Math.round(total/28*100);
+  const scoreColor = total>=20?'var(--green)':total>=14?'var(--amber)':'var(--red)';
+  let html = '<div class="section">';
+  html += '<div class="section-title">This Week\'s Scores<span class="section-title-bar"></span></div>';
+  html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:14px">';
+  html += '<span style="font-size:28px;font-weight:800;color:'+scoreColor+'">'+total+'</span>';
+  html += '<span style="font-size:13px;color:var(--text3)">/ 28 &nbsp;·&nbsp; '+pct+'%</span>';
+  html += '<span style="font-size:11px;color:var(--text3);margin-left:4px">Week of '+escHtml(String(ws.week))+'</span>';
+  html += '</div>';
+  // Grid header
+  html += '<div style="display:grid;grid-template-columns:36px repeat(4,1fr);gap:4px;margin-bottom:4px">';
+  html += '<div></div>';
+  catLabels.forEach(function(l){ html += '<div style="font-size:10px;font-weight:700;color:var(--text3);text-align:center;text-transform:uppercase;letter-spacing:.4px">'+l+'</div>'; });
+  html += '</div>';
+  // Rows
+  days.forEach(function(d){
+    const dayTotal = cats.filter(function(c){ return ws.days[d] && ws.days[d][c]; }).length;
+    const rowColor = dayTotal>=3?'var(--green)':dayTotal>=2?'var(--amber)':'var(--text3)';
+    html += '<div style="display:grid;grid-template-columns:36px repeat(4,1fr);gap:4px;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)">';
+    html += '<div style="font-size:12px;font-weight:700;color:var(--text2)">'+d+'</div>';
+    cats.forEach(function(c){
+      const on = ws.days[d] && ws.days[d][c];
+      html += '<div style="display:flex;justify-content:center">';
+      html += '<div style="width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;'+(on?'background:rgba(61,184,122,.15);color:var(--green)':'background:var(--surface2);color:var(--text3)')+'">'+( on?'✓':'·')+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
 function renderDashboard(data) {
   const hw = data.homework || [];
   const activity = (data.activity || []).filter(a => {
@@ -401,6 +464,8 @@ function renderDashboard(data) {
 
   // Today's Big 3
   html += renderBig3(dailyGoals);
+  html += renderWeekScores(data.weeklyScores || []);
+  html += renderCheckIn(data.checkIns || []);
 
   // Homework grouped by due date
   if (hw.length > 0) {

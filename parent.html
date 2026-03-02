@@ -281,7 +281,7 @@ body{
 <div class="bottom-spacer"></div>
 
 <script>
-const SCRIPT_URL = localStorage.getItem('tg_parent_url') || 'https://script.google.com/macros/s/AKfycbxE1AkWy8gnDUSL6K0CuwCnExlYXVu8XFBtclp8QBCByQlFCPj9KGHDEE9mOFSSHUNa/exec';
+const SCRIPT_URL = localStorage.getItem('tg_parent_url') || 'https://script.google.com/macros/s/AKfycbzOF0xrvzhS-qkgv8sm-1HYz7acsFVbu2iawH3YrmrOaFN22oqlXlpbHmKc1xbqbOeZ/exec';
 
 function $(s){return document.querySelector(s)}
 
@@ -573,10 +573,11 @@ function renderDashboard(data) {
     activity.slice(0,12).forEach(item => {
       const action = (item.action||'other').toLowerCase();
       const iconCls = ['added','completed','deleted','status_change'].includes(action) ? action : 'other';
-      html += '<div class="activity-item">';
-      html += '<div class="activity-icon ' + iconCls + '">' + actionIcon(action) + '</div>';
-      html += '<div><div class="activity-text">' + actionText(item) + '</div>';
+      html += '<div class="activity-item" style="display:flex;align-items:center;gap:8px">';
+      html += '<div class="activity-icon ' + iconCls + '" style="flex-shrink:0">' + actionIcon(action) + '</div>';
+      html += '<div style="flex:1;min-width:0"><div class="activity-text">' + actionText(item) + '</div>';
       html += '<div class="activity-time">' + formatTime(item.timestamp) + '</div></div>';
+      html += '<button onclick="deleteActivity(' + item.rowIndex + ',this)" style="width:28px;height:28px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;line-height:1">×</button>';
       html += '</div>';
     });
     html += '</div>';
@@ -637,6 +638,23 @@ function showSetup() {
 function saveUrl() {
   const url = document.getElementById('urlInput').value.trim();
   if (url) { localStorage.setItem('tg_parent_url', url); location.reload(); }
+}
+
+async function deleteActivity(rowIndex, btn) {
+  if (!SCRIPT_URL) return;
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify({action: 'delete_activity', rowIndex: rowIndex})
+    });
+    btn.closest('.activity-item').remove();
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '×';
+  }
 }
 
 async function deleteCancelled(rowIndex, btn) {

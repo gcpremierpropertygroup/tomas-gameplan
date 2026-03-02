@@ -1244,6 +1244,16 @@ $('#hw-sync-btn').addEventListener('click',()=>{
 
 /* Scoreboard */
 let scores=load('scores_'+wk,{});
+let _scoresSyncTimer=null;
+function syncScores(){
+  if(!APPS_SCRIPT_URL)return;
+  clearTimeout(_scoresSyncTimer);
+  _scoresSyncTimer=setTimeout(()=>{
+    const total=Object.values(scores).filter(v=>v).length;
+    fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'sync_scores',week:wk,scores:scores,total:total})}).catch(()=>{});
+  },1500);
+}
 function renderScores(){const c=$('#score-rows');c.innerHTML='';let total=0;
 const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],nums=[1,2,3,4,5,6,0];
 days.forEach((day,di)=>{const row=document.createElement('div');row.className='score-day-row';
@@ -1253,7 +1263,7 @@ const lbl=document.createElement('div');lbl.className='score-day-label'+(isToday
 let dp=0;CATS.forEach(cat=>{const cell=document.createElement('div');cell.style.display='flex';cell.style.justifyContent='center';
 const key=day+'_'+cat,on=scores[key]||false;
 const btn=document.createElement('button');btn.className='score-toggle'+(on?' yes':'');
-btn.addEventListener('click',()=>{const was=scores[key];scores[key]=!was;save('scores_'+wk,scores);renderScores();if(!was){addXP(XP_PER_SCORE);bumpStreak()}});
+btn.addEventListener('click',()=>{const was=scores[key];scores[key]=!was;save('scores_'+wk,scores);renderScores();syncScores();if(!was){addXP(XP_PER_SCORE);bumpStreak()}});
 cell.appendChild(btn);row.appendChild(cell);if(on)dp++});
 const pts=document.createElement('div');pts.className='score-day-pts '+(dp>=3?'high':dp>=2?'mid':'low');pts.textContent=dp;row.appendChild(pts);
 c.appendChild(row);total+=dp});
@@ -1270,7 +1280,13 @@ $('#reset-week').addEventListener('click',()=>{if(confirm('Reset scores?')){scor
 /* Check-in */
 const ci=load('ci_'+wk,{});
 for(let i=1;i<=4;i++){const ta=$(`#ci-${i}`);ta.value=ci['q'+i]||'';ta.addEventListener('input',()=>{ci['q'+i]=ta.value;save('ci_'+wk,ci)})}
-$('#save-ci').addEventListener('click',()=>{save('ci_'+wk,ci);addXP(50);toast('Check-in saved 🔥');flashMotiv()});
+$('#save-ci').addEventListener('click',()=>{
+  save('ci_'+wk,ci);addXP(50);toast('Check-in saved 🔥');flashMotiv();
+  if(APPS_SCRIPT_URL){
+    fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'sync_checkin',week:wk,checkin:ci})}).catch(()=>{});
+  }
+});
 
 /* Settings panel — long-press avatar */
 let avatarTimer=null;

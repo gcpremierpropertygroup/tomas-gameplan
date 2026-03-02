@@ -259,6 +259,7 @@ body{
       <div class="header-sub">Parent view</div>
     </div>
   </div>
+  <button onclick="resetAllData()" style="padding:6px 12px;border-radius:6px;border:1px solid var(--red-border);background:var(--red-bg);color:var(--red);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">Reset Data</button>
 </div>
 
 <div class="sync-bar">
@@ -565,6 +566,25 @@ function showSetup() {
 function saveUrl() {
   const url = document.getElementById('urlInput').value.trim();
   if (url) { localStorage.setItem('tg_parent_url', url); location.reload(); }
+}
+
+async function resetAllData() {
+  if (!confirm('Reset all data in the sheet? This clears homework, activity, Big 3, and cancelled items. Cannot be undone.')) return;
+  try {
+    const resp = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({action: 'reset_all'})
+    });
+    const data = await resp.json();
+    if (data.status === 'ok') {
+      $('#app').innerHTML = '<div class="empty-state"><div class="icon">✓</div><p>All data cleared.<br>Ready for a fresh start.</p></div>';
+      $('#syncText').textContent = 'Data reset';
+    } else {
+      alert('Reset failed: ' + (data.message || 'Unknown error'));
+    }
+  } catch(e) {
+    alert('Could not connect to reset.');
+  }
 }
 
 // Refresh every 2 minutes

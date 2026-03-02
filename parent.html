@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>Tomas — Parent View</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a0a;
+  --s1:#141414;--s2:#1c1c1c;--s3:#242424;
+  --text:#f0f0f0;--text2:#888;--text3:#484848;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.11);
+  --red:#e05252;--red-bg:rgba(224,82,82,.1);--red-border:rgba(224,82,82,.18);
+  --amber:#c9901a;--amber-bg:rgba(201,144,26,.1);--amber-border:rgba(201,144,26,.18);
+  --blue:#4a9eff;--blue-bg:rgba(74,158,255,.08);--blue-border:rgba(74,158,255,.15);
+  --green:#3db87a;--green-bg:rgba(61,184,122,.08);--green-border:rgba(61,184,122,.15);
+  --radius:10px;
+}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;min-height:100dvh;overflow-x:hidden;
+}
+
+/* ── Header ── */
+.header{
+  padding:20px 20px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-avatar{
+  width:36px;height:36px;border-radius:8px;
+  background:var(--s3);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--text2);letter-spacing:.5px;
+}
+.header-title{font-size:17px;font-weight:600;letter-spacing:-.02em}
+.header-sub{font-size:12px;color:var(--text3);margin-top:1px}
+
+/* ── Sync bar ── */
+.sync-bar{
+  padding:10px 20px;display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid var(--border);
+}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.sync-dot.syncing{background:var(--amber);animation:blink 1.2s ease infinite}
+.sync-dot.error{background:var(--red)}
+.sync-text{font-size:12px;color:var(--text3);flex:1}
+.refresh-btn{
+  padding:5px 12px;border-radius:6px;
+  border:1px solid var(--border2);
+  background:transparent;color:var(--text2);
+  font-size:12px;font-family:inherit;font-weight:500;
+  cursor:pointer;transition:background .15s,color .15s;
+}
+.refresh-btn:hover{background:var(--s2);color:var(--text)}
+.refresh-btn:active{background:var(--s3)}
+
+/* ── Stats ── */
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;background:var(--border);
+  border-bottom:1px solid var(--border);
+}
+.stat-card{
+  background:var(--bg);padding:16px 12px;text-align:center;
+}
+.stat-num{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.stat-label{font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-top:5px}
+.stat-overdue .stat-num{color:var(--red)}
+.stat-pending .stat-num{color:var(--amber)}
+.stat-progress .stat-num{color:var(--blue)}
+.stat-done .stat-num{color:var(--green)}
+
+/* ── Sections ── */
+.section{padding:0 16px;margin-bottom:24px}
+.section-title{
+  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:10px;padding-top:20px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title-bar{flex:1;height:1px;background:var(--border)}
+
+/* ── Big 3 Card ── */
+.big3-card{
+  border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;
+}
+.big3-date{
+  font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.04em;text-transform:uppercase;
+  padding:11px 16px;border-bottom:1px solid var(--border);background:var(--s1);
+}
+.big3-item{
+  display:flex;align-items:center;gap:12px;padding:13px 16px;
+  border-bottom:1px solid var(--border);
+}
+.big3-item:last-child{border-bottom:none}
+.big3-num{
+  width:24px;height:24px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;flex-shrink:0;
+}
+.big3-num.n1{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.big3-num.n2{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.big3-num.n3{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.big3-text{font-size:14px;font-weight:400;flex:1;line-height:1.35;color:var(--text)}
+.big3-check{font-size:15px;flex-shrink:0;color:var(--text3)}
+.big3-check.done{color:var(--green)}
+.big3-empty{font-size:13px;color:var(--text3);padding:20px 16px;text-align:center}
+
+/* ── Day Group ── */
+.day-group{margin-bottom:14px}
+.day-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.day-label{font-size:12px;font-weight:600;letter-spacing:.01em;white-space:nowrap}
+.day-label.overdue-day{color:var(--red)}
+.day-label.today-day{color:var(--blue)}
+.day-label.future-day{color:var(--text2)}
+.day-line{flex:1;height:1px;background:var(--border)}
+.day-count{font-size:11px;color:var(--text3);font-weight:500;white-space:nowrap}
+
+/* ── HW Cards ── */
+.hw-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--radius);padding:13px 14px;
+  margin-bottom:6px;display:flex;align-items:center;gap:11px;
+  cursor:pointer;transition:background .15s;
+}
+.hw-card:hover{background:var(--s2)}
+.hw-card:active{background:var(--s3)}
+.hw-status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hw-status-dot.overdue{background:var(--red)}
+.hw-status-dot.pending{background:var(--amber)}
+.hw-status-dot.in-progress{background:var(--blue)}
+.hw-status-dot.done{background:var(--green)}
+.hw-card-body{flex:1;min-width:0}
+.hw-name{font-size:14px;font-weight:500;line-height:1.3;color:var(--text)}
+.hw-name.done-name{text-decoration:line-through;color:var(--text3)}
+.hw-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.hw-badge{
+  font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  padding:3px 8px;border-radius:5px;white-space:nowrap;flex-shrink:0;
+}
+.badge-overdue{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.badge-pending{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.badge-in-progress{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.badge-done{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+
+/* ── Activity Feed ── */
+.activity-item{
+  display:flex;align-items:flex-start;gap:11px;
+  padding:11px 0;border-bottom:1px solid var(--border);
+}
+.activity-item:last-child{border-bottom:none}
+.activity-icon{
+  width:28px;height:28px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;flex-shrink:0;
+  border:1px solid var(--border);
+}
+.activity-icon.added{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
+.activity-icon.completed{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)}
+.activity-icon.deleted{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+.activity-icon.status_change{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border)}
+.activity-icon.other{background:var(--s2);color:var(--text3)}
+.activity-text{font-size:13px;line-height:1.45;color:var(--text2)}
+.activity-text strong{color:var(--text);font-weight:600}
+.activity-time{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* ── States ── */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-state .icon{font-size:36px;margin-bottom:14px;opacity:.5}
+.empty-state p{font-size:14px;line-height:1.6;color:var(--text3)}
+
+.loading{text-align:center;padding:80px 20px}
+.spinner{
+  width:24px;height:24px;
+  border:2px solid var(--s3);border-top-color:var(--text3);
+  border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{color:var(--text3);font-size:13px}
+
+.error-state{text-align:center;padding:60px 20px}
+.error-state .icon{font-size:28px;margin-bottom:10px;opacity:.6}
+.error-state p{font-size:13px;color:var(--text3);margin-top:6px;line-height:1.5}
+
+.bottom-spacer{height:48px}
+
+/* ── Drawer ── */
+.drawer-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  z-index:100;opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.drawer-overlay.show{opacity:1;pointer-events:all}
+.drawer{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#111;
+  border-top:1px solid var(--border2);
+  border-radius:14px 14px 0 0;
+  z-index:101;padding:0 20px 44px;
+  transform:translateY(100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  max-height:85vh;overflow-y:auto;
+}
+.drawer.show{transform:translateY(0)}
+.drawer-handle{
+  width:32px;height:3px;background:var(--s3);
+  border-radius:2px;margin:12px auto 20px;
+}
+.drawer-subject-badge{
+  display:inline-block;font-size:10px;font-weight:600;
+  padding:3px 10px;border-radius:5px;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--s2);color:var(--text2);border:1px solid var(--border2);margin-bottom:12px;
+}
+.drawer-name{
+  font-size:20px;font-weight:600;line-height:1.3;
+  letter-spacing:-.02em;margin-bottom:16px;color:var(--text);
+}
+.drawer-name.done-name{text-decoration:line-through;color:var(--text3)}
+.drawer-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+.drawer-cell{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:8px;padding:12px;
+}
+.drawer-cell-lbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.drawer-cell-val{font-size:14px;font-weight:500;color:var(--text)}
+.drawer-status-row{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;border-radius:8px;margin-bottom:14px;
+  border:1px solid var(--border);background:var(--s1);
+}
+.drawer-close{
+  width:100%;padding:13px;
+  border:1px solid var(--border2);border-radius:8px;
+  background:transparent;color:var(--text2);
+  font-size:13px;font-weight:500;font-family:inherit;
+  cursor:pointer;transition:background .15s,color .15s;letter-spacing:.01em;
+}
+.drawer-close:hover{background:var(--s2);color:var(--text)}
+.drawer-close:active{background:var(--s3)}
+
+@media(max-width:400px){.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-avatar">TG</div>
+    <div>
+      <div class="header-title">Tomas Tracker</div>
+      <div class="header-sub">Parent view</div>
+    </div>
+  </div>
+</div>
+
+<div class="sync-bar">
+  <div class="sync-dot" id="syncDot"></div>
+  <span class="sync-text" id="syncText">Connecting...</span>
+  <button class="refresh-btn" onclick="fetchData()">Refresh</button>
+</div>
+
+<div id="app">
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+</div>
+
+<div class="bottom-spacer"></div>
+
+<script>
+const SCRIPT_URL = localStorage.getItem('tg_parent_url') || 'https://script.google.com/macros/s/AKfycbz_eRMrzLYxS90D_k9gAaMHfLCs0mpyr0VLvPluT-WmbIKztTLU_EUmzVK8Wc27wkQ/exec';
+
+function $(s){return document.querySelector(s)}
+
+function getStatusInfo(hw) {
+  const today = new Date().toISOString().slice(0,10);
+  const status = (hw.status || 'not-started').toLowerCase();
+  if (status === 'done') return {cls:'done', badge:'Done', badgeCls:'badge-done'};
+  if (status === 'in-progress') return {cls:'in-progress', badge:'In Progress', badgeCls:'badge-in-progress'};
+  if (hw.due && hw.due < today) return {cls:'overdue', badge:'Overdue', badgeCls:'badge-overdue'};
+  return {cls:'pending', badge:'To Do', badgeCls:'badge-pending'};
+}
+
+function formatDue(due) {
+  if (!due || due === 'Invalid Date') return '';
+  try {
+    const d = new Date(due + 'T00:00:00');
+    if (isNaN(d.getTime())) return '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    const diff = Math.round((d - today) / 86400000);
+    if (diff < 0) return Math.abs(diff) + 'd overdue';
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Tomorrow';
+    return d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+  } catch(e) { return ''; }
+}
+
+function formatTime(ts) {
+  if (!ts) return '';
+  try {
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+    const itemDay = new Date(d); itemDay.setHours(0,0,0,0);
+    const timeStr = d.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', hour12:true});
+    if (itemDay.getTime() === today.getTime()) return 'Today at ' + timeStr;
+    if (itemDay.getTime() === yesterday.getTime()) return 'Yesterday at ' + timeStr;
+    return d.toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ' at ' + timeStr;
+  } catch(e) { return ''; }
+}
+
+function actionIcon(action) {
+  if (action === 'added') return '+';
+  if (action === 'completed') return '✓';
+  if (action === 'deleted') return '✕';
+  if (action === 'status_change') return '↻';
+  return '•';
+}
+
+function actionText(item) {
+  const name = '<strong>' + escHtml(item.name || 'Unknown') + '</strong>';
+  if (item.action === 'added') return name + ' was added';
+  if (item.action === 'completed') return name + ' marked complete';
+  if (item.action === 'deleted') return name + ' was removed';
+  if (item.action === 'status_change') return name + ' → ' + escHtml(item.status || '');
+  return name + ' updated';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderBig3(dailyGoals) {
+  const todayKey = new Date().toISOString().slice(0,10);
+  const todayGoals = (dailyGoals || []).find(g => g.date === todayKey);
+
+  let html = '<div class="section">';
+  html += '<div class="section-title">Today\'s Big 3<span class="section-title-bar"></span></div>';
+  html += '<div class="big3-card">';
+
+  const todayStr = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  html += '<div class="big3-date">' + todayStr + '</div>';
+
+  if (!todayGoals) {
+    html += '<div class="big3-empty">No goals set yet today</div>';
+  } else {
+    const goals = [todayGoals.goal1, todayGoals.goal2, todayGoals.goal3];
+    const checks = todayGoals.checks ? String(todayGoals.checks).split('') : [];
+    const numClasses = ['n1','n2','n3'];
+    goals.forEach((g, i) => {
+      if (!g) return;
+      const done = checks[i] === '1';
+      html += '<div class="big3-item">';
+      html += '<div class="big3-num ' + numClasses[i] + '">' + (i+1) + '</div>';
+      html += '<div class="big3-text" style="' + (done ? 'text-decoration:line-through;color:var(--text3)' : '') + '">' + escHtml(g) + '</div>';
+      html += '<div class="big3-check' + (done ? ' done' : '') + '">' + (done ? '✓' : '○') + '</div>';
+      html += '</div>';
+    });
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+function renderDashboard(data) {
+  const hw = data.homework || [];
+  const activity = (data.activity || []).filter(a => {
+    return a.action !== 'big3_locked';
+  });
+  const dailyGoals = data.dailyGoals || [];
+
+  const today = new Date().toISOString().slice(0,10);
+  let overdue=0, pending=0, inProgress=0, done=0;
+  hw.forEach(h => {
+    const s = (h.status||'not-started').toLowerCase();
+    if (s === 'done') { done++; return; }
+    if (s === 'in-progress') inProgress++; else pending++;
+    if (h.due && h.due < today) overdue++;
+  });
+
+  let html = '';
+
+  // Stats
+  html += '<div class="stats">';
+  html += '<div class="stat-card stat-overdue"><div class="stat-num">' + overdue + '</div><div class="stat-label">Overdue</div></div>';
+  html += '<div class="stat-card stat-pending"><div class="stat-num">' + pending + '</div><div class="stat-label">To Do</div></div>';
+  html += '<div class="stat-card stat-progress"><div class="stat-num">' + inProgress + '</div><div class="stat-label">Doing</div></div>';
+  html += '<div class="stat-card stat-done"><div class="stat-num">' + done + '</div><div class="stat-label">Done</div></div>';
+  html += '</div>';
+
+  // Today's Big 3
+  html += renderBig3(dailyGoals);
+
+  // Homework grouped by due date
+  if (hw.length > 0) {
+    const groups = {};
+    hw.forEach(h => {
+      const key = h.due || 'no-date';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(h);
+    });
+    const sortedKeys = Object.keys(groups).sort((a,b) => {
+      if (a === 'no-date') return 1;
+      if (b === 'no-date') return -1;
+      return a < b ? -1 : 1;
+    });
+
+    html += '<div class="section">';
+    html += '<div class="section-title">Homework<span class="section-title-bar"></span></div>';
+
+    sortedKeys.forEach(key => {
+      const items = groups[key];
+      const isNoDate = key === 'no-date';
+      const isOverdue = !isNoDate && key < today;
+      const isToday = key === today;
+
+      let dayLabel = 'No Due Date';
+      if (!isNoDate) {
+        const d = new Date(key + 'T12:00:00');
+        const diff = Math.round((d - new Date(today + 'T12:00:00')) / 86400000);
+        if (diff < 0) dayLabel = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' + Math.abs(diff) + 'd overdue';
+        else if (diff === 0) dayLabel = 'Today · ' + d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+        else if (diff === 1) dayLabel = 'Tomorrow · ' + d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+        else dayLabel = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      }
+
+      const labelCls = isOverdue ? 'overdue-day' : isToday ? 'today-day' : 'future-day';
+      const doneCount = items.filter(h => (h.status||'').toLowerCase() === 'done').length;
+
+      html += '<div class="day-group">';
+      html += '<div class="day-header">';
+      html += '<div class="day-label ' + labelCls + '">' + dayLabel + '</div>';
+      html += '<div class="day-line"></div>';
+      html += '<div class="day-count">' + doneCount + '/' + items.length + '</div>';
+      html += '</div>';
+
+      const dayItems = [...items].sort((a,b) => {
+        const aDone = (a.status||'').toLowerCase() === 'done' ? 1 : 0;
+        const bDone = (b.status||'').toLowerCase() === 'done' ? 1 : 0;
+        return aDone - bDone;
+      });
+
+      dayItems.forEach(h => {
+        const info = getStatusInfo(h);
+        const isDone = info.cls === 'done';
+        html += '<div class="hw-card" onclick=\'openHWDrawer(' + JSON.stringify(h) + ')\'>';
+        html += '<div class="hw-status-dot ' + info.cls + '"></div>';
+        html += '<div class="hw-card-body">';
+        html += '<div class="hw-name' + (isDone ? ' done-name' : '') + '">' + escHtml(h.name||'Untitled') + '</div>';
+        const meta = [h.subject ? escHtml(h.subject) : '', h.priority ? 'P' + escHtml(h.priority) : ''].filter(Boolean).join(' · ');
+        if (meta) html += '<div class="hw-meta">' + meta + '</div>';
+        html += '</div>';
+        html += '<span class="hw-badge ' + info.badgeCls + '">' + info.badge + '</span>';
+        html += '</div>';
+      });
+
+      html += '</div>';
+    });
+
+    html += '</div>';
+  }
+
+  // Cancelled HW log
+  const cancelled = data.cancelled || [];
+  if (cancelled.length > 0) {
+    html += '<div class="section">';
+    html += '<div class="section-title">Cancelled<span class="section-title-bar"></span></div>';
+    cancelled.forEach(h => {
+      html += '<div class="hw-card" style="opacity:.6">';
+      html += '<div class="hw-status-dot" style="background:var(--red)"></div>';
+      html += '<div class="hw-card-body">';
+      html += '<div class="hw-name done-name">' + escHtml(h.name||'Untitled') + '</div>';
+      const meta = [
+        h.subject ? escHtml(h.subject) : '',
+        h.due ? 'Due ' + formatDue(h.due) : '',
+        h.reason ? escHtml(h.reason) : ''
+      ].filter(Boolean).join(' · ');
+      if (meta) html += '<div class="hw-meta">' + meta + '</div>';
+      html += '<div class="hw-meta" style="margin-top:2px">' + formatTime(h.timestamp) + '</div>';
+      html += '</div>';
+      html += '<span class="hw-badge badge-overdue">Cancelled</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Activity Feed
+  if (activity.length > 0) {
+    html += '<div class="section">';
+    html += '<div class="section-title">Recent Activity<span class="section-title-bar"></span></div>';
+    activity.slice(0,12).forEach(item => {
+      const action = (item.action||'other').toLowerCase();
+      const iconCls = ['added','completed','deleted','status_change'].includes(action) ? action : 'other';
+      html += '<div class="activity-item">';
+      html += '<div class="activity-icon ' + iconCls + '">' + actionIcon(action) + '</div>';
+      html += '<div><div class="activity-text">' + actionText(item) + '</div>';
+      html += '<div class="activity-time">' + formatTime(item.timestamp) + '</div></div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (hw.length === 0 && activity.length === 0 && dailyGoals.length === 0) {
+    html += '<div class="empty-state"><div class="icon">📋</div>';
+    html += '<p>Nothing tracked yet.<br>Data will appear here once Tomas uses the app.</p></div>';
+  }
+
+  $('#app').innerHTML = html;
+}
+
+async function fetchData() {
+  if (!SCRIPT_URL) { showSetup(); return; }
+
+  const dot = $('#syncDot');
+  dot.className = 'sync-dot syncing';
+  $('#syncText').textContent = 'Syncing...';
+
+  try {
+    const resp = await fetch(SCRIPT_URL);
+    const data = await resp.json();
+    if (data.status === 'ok') {
+      renderDashboard(data);
+      dot.className = 'sync-dot';
+      const d = data.fetchedAt ? new Date(data.fetchedAt) : new Date();
+      const timeStr = isNaN(d.getTime()) ? 'just now' : d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+      $('#syncText').textContent = 'Updated ' + timeStr;
+    } else {
+      showError(data.message || 'Unknown error');
+    }
+  } catch(e) {
+    dot.className = 'sync-dot error';
+    $('#syncText').textContent = 'Connection error';
+    showError('Could not connect. Try refreshing.');
+    console.error('Fetch error:', e);
+  }
+}
+
+function showError(msg) {
+  $('#app').innerHTML = '<div class="error-state"><div class="icon">⚠</div><p>' + escHtml(msg) + '</p></div>';
+}
+
+function showSetup() {
+  $('#app').innerHTML = `
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:20px 16px">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">Paste your Apps Script URL to connect.</p>
+      <input type="text" id="urlInput" placeholder="https://script.google.com/macros/s/..."
+        style="width:100%;padding:11px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;margin-bottom:10px;outline:none">
+      <button onclick="saveUrl()"
+        style="width:100%;padding:11px;border-radius:8px;border:none;background:var(--text);color:var(--bg);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">
+        Connect
+      </button>
+    </div>`;
+}
+
+function saveUrl() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (url) { localStorage.setItem('tg_parent_url', url); location.reload(); }
+}
+
+// Refresh every 2 minutes
+setInterval(fetchData, 120000);
+
+// Refresh when tab becomes visible
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) fetchData();
+});
+
+fetchData();
+
+/* ===== HW DETAIL DRAWER ===== */
+(function(){
+  document.body.insertAdjacentHTML('beforeend', `
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="drawer" id="hwDrawer">
+      <div class="drawer-handle"></div>
+      <div id="drawerContent"></div>
+      <button class="drawer-close" onclick="closeDrawer()">Dismiss</button>
+    </div>
+  `);
+
+  window.openHWDrawer = function(hw) {
+    const isDone = (hw.status||'').toLowerCase() === 'done';
+    const today = new Date().toISOString().slice(0,10);
+    const isOverdue = hw.due && hw.due < today && !isDone;
+
+    const statusMap = {
+      'done':        {bg:'var(--green-bg)', color:'var(--green)',   border:'var(--green-border)',  label:'Done'},
+      'in progress': {bg:'var(--blue-bg)',  color:'var(--blue)',    border:'var(--blue-border)',   label:'In Progress'},
+      'overdue':     {bg:'var(--red-bg)',   color:'var(--red)',     border:'var(--red-border)',    label:'Overdue'},
+      'to do':       {bg:'var(--amber-bg)', color:'var(--amber)',   border:'var(--amber-border)',  label:'To Do'},
+    };
+    const statusKey = isOverdue ? 'overdue' : (hw.status||'to do').toLowerCase();
+    const sc = statusMap[statusKey] || statusMap['to do'];
+
+    const priLabel = hw.priority == 1 ? 'P1 — Critical' : hw.priority == 2 ? 'P2 — Important' : hw.priority == 3 ? 'P3 — Normal' : '—';
+    const dueLabel = hw.due ? new Date(hw.due + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) : 'No due date';
+    const addedLabel = hw.added ? new Date(hw.added + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+
+    document.getElementById('drawerContent').innerHTML = `
+      ${hw.subject ? `<div class="drawer-subject-badge">${escHtml(hw.subject)}</div>` : ''}
+      <div class="drawer-name${isDone?' done-name':''}">${escHtml(hw.name||'Untitled')}</div>
+      <div class="drawer-status-row" style="background:${sc.bg};border-color:${sc.border}">
+        <span style="width:8px;height:8px;border-radius:50%;background:${sc.color};flex-shrink:0;display:inline-block"></span>
+        <span style="font-size:13px;font-weight:600;color:${sc.color}">${sc.label}</span>
+        ${isOverdue ? '<span style="font-size:12px;color:var(--text3);margin-left:auto">' + Math.abs(Math.round((new Date(hw.due+'T12:00:00') - new Date(today+'T12:00:00'))/86400000)) + 'd overdue</span>' : ''}
+      </div>
+      <div class="drawer-grid">
+        <div class="drawer-cell">
+          <div class="drawer-cell-lbl">Due</div>
+          <div class="drawer-cell-val" style="${isOverdue?'color:var(--red)':''}">${dueLabel}</div>
+        </div>
+        <div class="drawer-cell">
+          <div class="drawer-cell-lbl">Priority</div>
+          <div class="drawer-cell-val">${priLabel}</div>
+        </div>
+        <div class="drawer-cell">
+          <div class="drawer-cell-lbl">Subject</div>
+          <div class="drawer-cell-val">${escHtml(hw.subject||'—')}</div>
+        </div>
+        <div class="drawer-cell">
+          <div class="drawer-cell-lbl">Added</div>
+          <div class="drawer-cell-val">${addedLabel}</div>
+        </div>
+      </div>
+    `;
+    document.getElementById('drawerOverlay').classList.add('show');
+    document.getElementById('hwDrawer').classList.add('show');
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('drawerOverlay').classList.remove('show');
+    document.getElementById('hwDrawer').classList.remove('show');
+  };
+
+  document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+})();
+</script>
+</body>
+</html>

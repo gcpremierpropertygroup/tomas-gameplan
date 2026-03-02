@@ -1015,17 +1015,17 @@ function openCalendar(hw){
   // Build VALARM blocks
   const alarms=[];
   const addAlarm=(trigger,desc)=>alarms.push('BEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:'+desc+'\r\nTRIGGER:'+trigger+'\r\nEND:VALARM');
-  // Due-date reminders: 5 PM=+9h, 6 PM=+10h, 7 PM=+11h from 8 AM
-  addAlarm('PT9H',title+' \u2014 due today (5 PM)');
-  addAlarm('PT10H',title+' \u2014 due today (6 PM)');
-  addAlarm('PT11H',title+' \u2014 due today (7 PM)');
-  // Daily 7 PM reminders from tomorrow through day before due date
+  // Day-before reminders: 5 PM, 6 PM, 7 PM (8 AM due date minus 15/14/13h)
+  addAlarm('-PT15H',title+' \u2014 due tomorrow (5 PM)');
+  addAlarm('-PT14H',title+' \u2014 due tomorrow (6 PM)');
+  addAlarm('-PT13H',title+' \u2014 due tomorrow (7 PM)');
+  // Daily 7 PM reminders from tomorrow through 2 days before due date
   const today=new Date(); today.setHours(0,0,0,0);
   const dueDay=new Date(parts[0],parts[1]-1,parts[2],0,0,0);
   let day=new Date(today); day.setDate(day.getDate()+1);
-  const dayBefore=new Date(dueDay); dayBefore.setDate(dayBefore.getDate()-1);
+  const twoDaysBefore=new Date(dueDay); twoDaysBefore.setDate(twoDaysBefore.getDate()-2);
   let count=0;
-  while(day<=dayBefore && count<14){
+  while(day<=twoDaysBefore && count<14){
     const rem=new Date(day); rem.setHours(19,0,0,0);
     const diffH=Math.round((rem-start)/3600000);
     const trigger=(diffH<0?'-PT'+Math.abs(diffH):'PT'+diffH)+'H';

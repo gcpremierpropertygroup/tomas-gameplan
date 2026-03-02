@@ -1002,12 +1002,33 @@ function hwDateLabel(due){
 }
 
 function openCalendar(hw){
-  const title=encodeURIComponent((hw.subject?hw.subject+': ':'')+hw.name);
-  const details=encodeURIComponent('Priority: '+(hw.pri||'—')+'\nAdded from TG Game Plan');
   if(!hw.due){toast('Set a due date first');return}
+  const title=(hw.subject?hw.subject+': ':'')+hw.name;
+  const details='Priority: '+(hw.pri||'—')+'\\nAdded from TG Game Plan';
   const d=hw.due.replace(/-/g,'');
-  const url='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+title+'&dates='+d+'/'+d+'&details='+details+'&trp=false';
-  window.open(url,'_blank');
+  const uid=Date.now()+'@tg-gameplan';
+  const ics=[
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//TG Game Plan//EN',
+    'BEGIN:VEVENT',
+    'UID:'+uid,
+    'DTSTART;VALUE=DATE:'+d,
+    'DTEND;VALUE=DATE:'+d,
+    'SUMMARY:'+title.replace(/,/g,'\\,'),
+    'DESCRIPTION:'+details,
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+  const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=title.replace(/[^a-z0-9]/gi,'_').slice(0,40)+'.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 function updateHWStats(){

@@ -728,14 +728,10 @@ select.hw-f-input{
 <!-- Cancel HW modal -->
 <div id="cancel-overlay" class="cancel-overlay">
   <div class="cancel-sheet">
-    <h3>Why are you removing this?</h3>
+    <h3>Delete assignment?</h3>
     <div class="cancel-sub" id="cancel-hw-name"></div>
-    <button class="cancel-reason-btn" data-reason="Teacher cancelled it"><span class="cancel-reason-icon">👩‍🏫</span>Teacher cancelled it</button>
-    <button class="cancel-reason-btn" data-reason="Already turned it in"><span class="cancel-reason-icon">✅</span>Already turned it in</button>
-    <button class="cancel-reason-btn" data-reason="Entered by mistake"><span class="cancel-reason-icon">✏️</span>Entered by mistake</button>
-    <button class="cancel-reason-btn" data-reason="Wrong class"><span class="cancel-reason-icon">📚</span>Wrong class</button>
-    <button class="cancel-reason-btn" data-reason="Due date changed"><span class="cancel-reason-icon">📅</span>Due date changed</button>
-    <button class="cancel-dismiss" id="cancel-dismiss">Never mind</button>
+    <button id="cancel-confirm-delete" style="width:100%;background:rgba(255,71,87,.12);border:1px solid rgba(255,71,87,.3);border-radius:14px;padding:16px;color:#ff4757;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px">🗑 Yes, delete it</button>
+    <button class="cancel-dismiss" id="cancel-dismiss">Keep it</button>
   </div>
 </div>
 
@@ -1183,13 +1179,7 @@ function renderHW(){
     btn.addEventListener('click',()=>{
       const idx=parseInt(btn.dataset.idx);
       const hw=hwData[idx];
-      const ageMs=Date.now()-(hw.addedAt||0);
-      if(ageMs<120000){
-        // Within 2 min — silent delete, no reason needed
-        hwData.splice(idx,1);save('hw_all',hwData);fullSync();renderHW();toast('Removed');
-      } else {
-        showCancelModal(idx);
-      }
+      showCancelModal(idx);
     });
   });
 }
@@ -1337,21 +1327,16 @@ function closeCancelModal(){ $('#cancel-overlay').classList.remove('open'); _can
 $('#cancel-dismiss').addEventListener('click', closeCancelModal);
 $('#cancel-overlay').addEventListener('click', e => { if(e.target===$('#cancel-overlay')) closeCancelModal(); });
 
-document.querySelectorAll('.cancel-reason-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if(_cancelIdx===null) return;
-    const reason = btn.dataset.reason;
-    const hw = hwData[_cancelIdx];
-    const cancelled = {...hw, reason, cancelledAt: new Date().toISOString()};
-    hwData.splice(_cancelIdx, 1);
-    save('hw_all', hwData);
-    // Sync cancellation to sheet
-    syncToSheet('cancelled', cancelled);
-    fullSync();
-    renderHW();
-    closeCancelModal();
-    toast('Removed: ' + reason);
-  });
+$('#cancel-confirm-delete').addEventListener('click', () => {
+  if(_cancelIdx===null) return;
+  const hw = hwData[_cancelIdx];
+  hwData.splice(_cancelIdx, 1);
+  save('hw_all', hwData);
+  syncToSheet('cancelled', {...hw, reason:'Deleted', cancelledAt: new Date().toISOString()});
+  fullSync();
+  renderHW();
+  closeCancelModal();
+  toast('Deleted ✓');
 });
 
 /* ===== CALENDAR ===== */

@@ -281,7 +281,7 @@ body{
 <div class="bottom-spacer"></div>
 
 <script>
-const SCRIPT_URL = localStorage.getItem('tg_parent_url') || 'https://script.google.com/macros/s/AKfycbz9nAKk5dzVvVbce94mDQCLHtuW9VId8ec6Ywa0qM07H3DMpFW-SZJFRPgYF838bZvP/exec';
+const SCRIPT_URL = localStorage.getItem('tg_parent_url') || 'https://script.google.com/macros/s/AKfycbxE1AkWy8gnDUSL6K0CuwCnExlYXVu8XFBtclp8QBCByQlFCPj9KGHDEE9mOFSSHUNa/exec';
 
 function $(s){return document.querySelector(s)}
 
@@ -545,9 +545,9 @@ function renderDashboard(data) {
     html += '<div class="section">';
     html += '<div class="section-title">Cancelled<span class="section-title-bar"></span></div>';
     cancelled.forEach(h => {
-      html += '<div class="hw-card" style="opacity:.6">';
-      html += '<div class="hw-status-dot" style="background:var(--red)"></div>';
-      html += '<div class="hw-card-body">';
+      html += '<div class="hw-card" style="opacity:.6;display:flex;align-items:center;gap:8px">';
+      html += '<div class="hw-status-dot" style="background:var(--red);flex-shrink:0"></div>';
+      html += '<div class="hw-card-body" style="flex:1;min-width:0">';
       html += '<div class="hw-name done-name">' + escHtml(h.name||'Untitled') + '</div>';
       const meta = [
         h.subject ? escHtml(h.subject) : '',
@@ -557,7 +557,10 @@ function renderDashboard(data) {
       if (meta) html += '<div class="hw-meta">' + meta + '</div>';
       html += '<div class="hw-meta" style="margin-top:2px">' + formatTime(h.timestamp) + '</div>';
       html += '</div>';
+      html += '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">';
       html += '<span class="hw-badge badge-overdue">Cancelled</span>';
+      html += '<button onclick="deleteCancelled(' + h.rowIndex + ',this)" style="width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,71,87,.3);background:rgba(255,71,87,.08);color:#ff4757;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;line-height:1">×</button>';
+      html += '</div>';
       html += '</div>';
     });
     html += '</div>';
@@ -634,6 +637,24 @@ function showSetup() {
 function saveUrl() {
   const url = document.getElementById('urlInput').value.trim();
   if (url) { localStorage.setItem('tg_parent_url', url); location.reload(); }
+}
+
+async function deleteCancelled(rowIndex, btn) {
+  if (!SCRIPT_URL) return;
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify({action: 'delete_cancelled', rowIndex: rowIndex})
+    });
+    // Remove the card from DOM immediately
+    btn.closest('.hw-card').remove();
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '×';
+  }
 }
 
 async function openResetModal() {

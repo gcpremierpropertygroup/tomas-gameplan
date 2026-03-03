@@ -719,7 +719,21 @@ function renderDashboard(data) {
   if (_af === 'overdue') hwView = hw.filter(h => (h.status||'not-started') !== 'done' && h.due && h.due < today);
   else if (_af === 'pending') hwView = hw.filter(h => ['not-started',''].includes((h.status||'not-started').toLowerCase()));
   else if (_af === 'doing') hwView = hw.filter(h => (h.status||'not-started').toLowerCase() === 'in-progress');
-  else if (_af === 'done') hwView = hw.filter(h => (h.status||'not-started').toLowerCase() === 'done');
+  else if (_af === 'done') {
+    // Items still in sheet marked done
+    const sheetDone = hw.filter(h => (h.status||'not-started').toLowerCase() === 'done');
+    // Items completed + removed from sheet (live in activity log)
+    const hwNames = new Set(hw.map(h => h.name));
+    const seen = new Set(sheetDone.map(h => h.name));
+    const actDone = [];
+    (data.activity || []).forEach(a => {
+      if (a.action === 'completed' && a.name && !hwNames.has(a.name) && !seen.has(a.name)) {
+        seen.add(a.name);
+        actDone.push({name: a.name, status: 'done', subject: a.subject || '', due: '', priority: '', _fromActivity: true, _completedAt: a.timestamp});
+      }
+    });
+    hwView = [...sheetDone, ...actDone];
+  }
 
   // Filter label
   if (_af !== 'all') {
@@ -750,7 +764,7 @@ function renderDashboard(data) {
       const isOverdue = !isNoDate && key < today;
       const isToday = key === today;
 
-      let dayLabel = 'No Due Date';
+      let dayLabel = (_af === 'done' && isNoDate) ? 'Completed' : 'No Due Date';
       if (!isNoDate) {
         const d = new Date(key + 'T12:00:00');
         const diff = Math.round((d - new Date(today + 'T12:00:00')) / 86400000);
@@ -786,7 +800,9 @@ function renderDashboard(data) {
         html += '<div class="hw-name' + (isDone ? ' done-name' : '') + '">' + escHtml(h.name||'Untitled') + '</div>';
         const tags = [];
         if (h.subject) tags.push('<span class="hw-tag hw-tag-subject ' + subjectColorClass(h.subject) + '">' + escHtml(h.subject) + '</span>');
-        if (h.due) {
+        if (h._fromActivity && h._completedAt) {
+          tags.push('<span class="hw-tag hw-tag-due">✓ ' + formatTime(h._completedAt) + '</span>');
+        } else if (h.due) {
           const dueCls = info.cls === 'overdue' ? 'due-overdue' : (h.due === today ? 'due-today' : '');
           tags.push('<span class="hw-tag hw-tag-due ' + dueCls + '">📅 ' + formatDue(h.due) + '</span>');
         }
@@ -795,7 +811,9 @@ function renderDashboard(data) {
         html += '</div>';
         html += '<span class="hw-badge ' + info.badgeCls + '">' + info.badge + '</span>';
         html += '</div>';
-        html += '<button onclick="deleteHomework(' + h.rowIndex + ',\'' + escHtml(h.name||'').replace(/'/g,"\\'") + '\',\'' + escHtml(h.subject||'') + '\',\'' + escHtml(h.due||'') + '\',\'' + escHtml(h.priority||'') + '\',this)" style="flex-shrink:0;width:36px;height:36px;margin-right:8px;border-radius:8px;border:1px solid rgba(255,71,87,.3);background:rgba(255,71,87,.08);color:#ff4757;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;line-height:1">×</button>';
+        if (!h._fromActivity) {
+          html += '<button onclick="deleteHomework(' + h.rowIndex + ',\'' + escHtml(h.name||'').replace(/'/g,"\\'") + '\',\'' + escHtml(h.subject||'') + '\',\'' + escHtml(h.due||'') + '\',\'' + escHtml(h.priority||'') + '\',this)" style="flex-shrink:0;width:36px;height:36px;margin-right:8px;border-radius:8px;border:1px solid rgba(255,71,87,.3);background:rgba(255,71,87,.08);color:#ff4757;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;line-height:1">×</button>';
+        }
         html += '</div>';
       });
 

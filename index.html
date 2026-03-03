@@ -1311,8 +1311,8 @@ $('#reset-all-btn').addEventListener('click',()=>{
   setTimeout(()=>location.reload(), 800);
 });
 
-/* Auto-sync on page load if URL configured */
-if(APPS_SCRIPT_URL){setTimeout(fullSync,2000)}
+/* Auto-sync on page load only if there's actual data to sync */
+if(APPS_SCRIPT_URL && hwData.length > 0){setTimeout(fullSync,2000)}
 /* ===== CANCEL MODAL ===== */
 let _cancelIdx = null;
 function showCancelModal(idx){

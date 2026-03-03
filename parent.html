@@ -558,7 +558,11 @@ function escHtml(s) {
 
 function renderBig3(dailyGoals) {
   const todayKey = new Date().toISOString().slice(0,10);
-  const todayGoals = (dailyGoals || []).find(g => g.date === todayKey);
+  const todayGoals = (dailyGoals || []).find(g => {
+    // Handle both date field and syncedAt timestamp
+    const gDate = g.date || (g.syncedAt ? g.syncedAt.slice(0,10) : null);
+    return gDate === todayKey;
+  });
 
   let html = '<div class="section">';
   html += '<div class="section-title">🎯 Today\'s Big 3<span class="section-title-bar"></span></div>';

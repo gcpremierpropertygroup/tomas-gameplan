@@ -371,10 +371,10 @@ function formatTime(ts) {
 
 function actionIcon(action) {
   if (action === 'added') return '+';
-  if (action === 'completed') return '✓';
-  if (action === 'deleted') return '✕';
-  if (action === 'status_change') return '↻';
-  return '•';
+  if (action === 'completed') return '\u2713';
+  if (action === 'deleted') return '\u2715';
+  if (action === 'status_change') return '\u21BB';
+  return '\u2022';
 }
 
 function actionText(item) {
@@ -382,7 +382,7 @@ function actionText(item) {
   if (item.action === 'added') return name + ' was added';
   if (item.action === 'completed') return name + ' marked complete';
   if (item.action === 'deleted') return name + ' was removed';
-  if (item.action === 'status_change') return name + ' → ' + escHtml(item.status || '');
+  if (item.action === 'status_change') return name + ' \u2192 ' + escHtml(item.status || '');
   return name + ' updated';
 }
 
@@ -413,7 +413,7 @@ function renderBig3(dailyGoals) {
       html += '<div class="big3-item">';
       html += '<div class="big3-num ' + numClasses[i] + '">' + (i+1) + '</div>';
       html += '<div class="big3-text" style="' + (done ? 'text-decoration:line-through;color:var(--text3)' : '') + '">' + escHtml(g) + '</div>';
-      html += '<div class="big3-check' + (done ? ' done' : '') + '">' + (done ? '✓' : '○') + '</div>';
+      html += '<div class="big3-check' + (done ? ' done' : '') + '">' + (done ? '\u2713' : '\u25CB') + '</div>';
       html += '</div>';
     });
   }
@@ -441,7 +441,7 @@ function renderCheckIn(checkIns) {
     html += '<div style="font-size:13px;font-weight:600;color:var(--text)">Week of ' + escHtml(String(ci.week)) + '</div>';
     if (ci.savedAt) html += '<div style="font-size:11px;color:var(--text3);margin-top:2px">Saved ' + formatTime(ci.savedAt) + '</div>';
     html += '</div>';
-    html += '<div id="' + entryId + '-arrow" style="font-size:28px;color:var(--text3);transition:transform .2s;' + (isFirst ? 'transform:rotate(180deg)' : '') + '">▼</div>';
+    html += '<div id="' + entryId + '-arrow" style="font-size:28px;color:var(--text3);transition:transform .2s;' + (isFirst ? 'transform:rotate(180deg)' : '') + '">\u25BC</div>';
     html += '</div>';
     html += '<div id="' + entryId + '" style="' + (isFirst ? '' : 'display:none;') + 'padding:14px;border-top:1px solid var(--border)">';
     let hasAny = false;
@@ -475,7 +475,7 @@ function renderWeekScores(weeklyScores) {
   html += '<div class="section-title">This Week\'s Scores<span class="section-title-bar"></span></div>';
   html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:14px">';
   html += '<span style="font-size:28px;font-weight:800;color:'+scoreColor+'">'+total+'</span>';
-  html += '<span style="font-size:13px;color:var(--text3)">/ 28 &nbsp;·&nbsp; '+pct+'%</span>';
+  html += '<span style="font-size:13px;color:var(--text3)">/ 28 &nbsp;\u00B7&nbsp; '+pct+'%</span>';
   html += '<span style="font-size:11px;color:var(--text3);margin-left:4px">Week of '+escHtml(String(ws.week))+'</span>';
   html += '</div>';
   html += '<div style="display:grid;grid-template-columns:36px repeat(4,1fr);gap:4px;margin-bottom:4px">';
@@ -489,7 +489,7 @@ function renderWeekScores(weeklyScores) {
     cats.forEach(function(c){
       const on = ws.days[d] && ws.days[d][c];
       html += '<div style="display:flex;justify-content:center">';
-      html += '<div style="width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;'+(on?'background:rgba(61,184,122,.15);color:var(--green)':'background:var(--s2);color:var(--text3)')+'">'+( on?'✓':'·')+'</div>';
+      html += '<div style="width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;'+(on?'background:rgba(61,184,122,.15);color:var(--green)':'background:var(--s2);color:var(--text3)')+'">'+( on?'\u2713':'\u00B7')+'</div>';
       html += '</div>';
     });
     html += '</div>';
@@ -564,9 +564,9 @@ function renderDashboard(data) {
       if (!isNoDate) {
         const d = new Date(key + 'T12:00:00');
         const diff = Math.round((d - new Date(today + 'T12:00:00')) / 86400000);
-        if (diff < 0) dayLabel = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' + Math.abs(diff) + 'd overdue';
-        else if (diff === 0) dayLabel = 'Today · ' + d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-        else if (diff === 1) dayLabel = 'Tomorrow · ' + d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+        if (diff < 0) dayLabel = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' \u00B7 ' + Math.abs(diff) + 'd overdue';
+        else if (diff === 0) dayLabel = 'Today \u00B7 ' + d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+        else if (diff === 1) dayLabel = 'Tomorrow \u00B7 ' + d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
         else dayLabel = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
       }
 
@@ -593,7 +593,7 @@ function renderDashboard(data) {
         html += '<div class="hw-status-dot ' + info.cls + '"></div>';
         html += '<div class="hw-card-body">';
         html += '<div class="hw-name' + (isDone ? ' done-name' : '') + '">' + escHtml(h.name||'Untitled') + '</div>';
-        const meta = [h.subject ? escHtml(h.subject) : '', h.priority ? 'P' + escHtml(h.priority) : ''].filter(Boolean).join(' · ');
+        const meta = [h.subject ? escHtml(h.subject) : '', h.priority ? 'P' + escHtml(h.priority) : ''].filter(Boolean).join(' \u00B7 ');
         if (meta) html += '<div class="hw-meta">' + meta + '</div>';
         html += '</div>';
         html += '<span class="hw-badge ' + info.badgeCls + '">' + info.badge + '</span>';
@@ -606,7 +606,7 @@ function renderDashboard(data) {
     html += '</div>';
   }
 
-  // Cancelled HW log (view only — no delete buttons)
+  // Cancelled HW log (view only \u2014 no delete buttons)
   const cancelled = data.cancelled || [];
   if (cancelled.length > 0) {
     html += '<div class="section">';
@@ -620,7 +620,7 @@ function renderDashboard(data) {
         h.subject ? escHtml(h.subject) : '',
         h.due ? 'Due ' + formatDue(h.due) : '',
         h.reason ? escHtml(h.reason) : ''
-      ].filter(Boolean).join(' · ');
+      ].filter(Boolean).join(' \u00B7 ');
       if (meta) html += '<div class="hw-meta">' + meta + '</div>';
       html += '<div class="hw-meta" style="margin-top:2px">' + formatTime(h.timestamp) + '</div>';
       html += '</div>';
@@ -630,7 +630,7 @@ function renderDashboard(data) {
     html += '</div>';
   }
 
-  // Activity Feed (view only — no delete buttons)
+  // Activity Feed (view only \u2014 no delete buttons)
   if (activity.length > 0) {
     html += '<div class="section">';
     html += '<div class="section-title">Recent Activity<span class="section-title-bar"></span></div>';
@@ -647,14 +647,14 @@ function renderDashboard(data) {
   }
 
   if (hw.length === 0 && activity.length === 0 && dailyGoals.length === 0) {
-    html += '<div class="empty-state"><div class="icon">📋</div>';
+    html += '<div class="empty-state"><div class="icon">\uD83D\uDCCB</div>';
     html += '<p>Nothing tracked yet.<br>Data will appear here once Tomas uses the app.</p></div>';
   }
 
   $('#app').innerHTML = html;
 }
 
-// ── History / Log Panel ─────────────────────────────────────
+// \u2500\u2500 History / Log Panel \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 var _historyTab = 'all';
 function openHistory() {
   document.getElementById('history-panel').classList.add('open');
@@ -694,7 +694,7 @@ function renderHistory(tab) {
       entries.push({
         ts: ci.savedAt || ci.week,
         type: 'check_in',
-        label: 'Sunday Check-In saved — <strong>Week of ' + escHtml(String(ci.week)) + '</strong>',
+        label: 'Sunday Check-In saved \u2014 <strong>Week of ' + escHtml(String(ci.week)) + '</strong>',
         sub: '',
         category: 'checkin'
       });
@@ -709,7 +709,7 @@ function renderHistory(tab) {
       entries.push({
         ts: g.syncedAt || g.date,
         type: 'other',
-        label: 'Big 3 set — <strong>' + done + '/' + goals.length + ' completed</strong>: ' + goals.map(x => escHtml(x)).join(', '),
+        label: 'Big 3 set \u2014 <strong>' + done + '/' + goals.length + ' completed</strong>: ' + goals.map(x => escHtml(x)).join(', '),
         sub: '',
         category: 'goals'
       });
@@ -721,7 +721,7 @@ function renderHistory(tab) {
     entries.push({
       ts: c.timestamp,
       type: 'cancelled',
-      label: '<strong>' + escHtml(c.name || 'Untitled') + '</strong> cancelled' + (c.reason ? ' — ' + escHtml(c.reason) : ''),
+      label: '<strong>' + escHtml(c.name || 'Untitled') + '</strong> cancelled' + (c.reason ? ' \u2014 ' + escHtml(c.reason) : ''),
       sub: c.subject || '',
       category: 'cancelled'
     });
@@ -761,7 +761,7 @@ function renderHistory(tab) {
       html += '<div class="hlog-item">';
       html += '<div class="hlog-dot ' + dotCls + '"></div>';
       html += '<div style="flex:1;min-width:0">';
-      html += '<div class="hlog-text">' + e.label + (e.sub ? ' <span style="color:var(--text3)">· ' + escHtml(e.sub) + '</span>' : '') + '</div>';
+      html += '<div class="hlog-text">' + e.label + (e.sub ? ' <span style="color:var(--text3)">\u00B7 ' + escHtml(e.sub) + '</span>' : '') + '</div>';
       if (e.ts) html += '<div class="hlog-time">' + formatTime(e.ts) + '</div>';
       html += '</div></div>';
     });
@@ -769,13 +769,13 @@ function renderHistory(tab) {
 
   body.innerHTML = html;
 }
-// ── HW Filter ──────────────────────────────────────────────
+// \u2500\u2500 HW Filter \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 window._hwFilter = 'all';
 function setHWFilter(filter) {
   window._hwFilter = (window._hwFilter === filter) ? 'all' : filter;
   if (window._lastData) renderDashboard(window._lastData);
 }
-// ───────────────────────────────────────────────────────────
+// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 
 function toggleCheckIn(id) {
   const body = document.getElementById(id);
@@ -813,7 +813,7 @@ async function fetchData() {
 }
 
 function showError(msg) {
-  $('#app').innerHTML = '<div class="error-state"><div class="icon">⚠</div><p>' + escHtml(msg) + '</p></div>';
+  $('#app').innerHTML = '<div class="error-state"><div class="icon">\u26A0</div><p>' + escHtml(msg) + '</p></div>';
 }
 
 // Refresh every 2 minutes
@@ -851,9 +851,9 @@ fetchData();
     const statusKey = isOverdue ? 'overdue' : (hw.status||'to do').toLowerCase();
     const sc = statusMap[statusKey] || statusMap['to do'];
 
-    const priLabel = hw.priority == 1 ? 'P1 — Critical' : hw.priority == 2 ? 'P2 — Important' : hw.priority == 3 ? 'P3 — Normal' : '—';
+    const priLabel = hw.priority == 1 ? 'P1 \u2014 Critical' : hw.priority == 2 ? 'P2 \u2014 Important' : hw.priority == 3 ? 'P3 \u2014 Normal' : '\u2014';
     const dueLabel = hw.due ? new Date(hw.due + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) : 'No due date';
-    const addedLabel = hw.added ? new Date(hw.added + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+    const addedLabel = hw.added ? new Date(hw.added + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '\u2014';
 
     document.getElementById('drawerContent').innerHTML = `
       ${hw.subject ? `<div class="drawer-subject-badge">${escHtml(hw.subject)}</div>` : ''}
@@ -874,7 +874,7 @@ fetchData();
         </div>
         <div class="drawer-cell">
           <div class="drawer-cell-lbl">Subject</div>
-          <div class="drawer-cell-val">${escHtml(hw.subject||'—')}</div>
+          <div class="drawer-cell-val">${escHtml(hw.subject||'\u2014')}</div>
         </div>
         <div class="drawer-cell">
           <div class="drawer-cell-lbl">Added</div>

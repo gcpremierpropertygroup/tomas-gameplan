@@ -392,7 +392,36 @@ function escHtml(s) {
 
 function renderBig3(dailyGoals) {
   const todayKey = new Date().toISOString().slice(0,10);
-  const todayGoals = (dailyGoals || []).find(g => g.date === todayKey);
+  
+  // Find today's goals with flexible date matching
+  let todayGoals = null;
+  if (dailyGoals && dailyGoals.length > 0) {
+    // Try to find matching goal by date
+    todayGoals = (dailyGoals || []).find(g => {
+      if (!g) return false;
+      
+      // Strategy 1: Check explicit date field
+      if (g.date && String(g.date) === todayKey) return true;
+      
+      // Strategy 2: Parse syncedAt timestamp
+      if (g.syncedAt) {
+        const syncDate = String(g.syncedAt).slice(0, 10);
+        if (syncDate === todayKey) return true;
+      }
+      
+      // Strategy 3: If no date fields exist, use most recent goal (assume it's today)
+      return false;
+    });
+    
+    // If no match found by date and we have goals, use the most recent one
+    if (!todayGoals && dailyGoals.length > 0) {
+      todayGoals = dailyGoals.reduce((latest, current) => {
+        const latestTs = latest.syncedAt || latest.date || '';
+        const currentTs = current.syncedAt || current.date || '';
+        return String(currentTs) > String(latestTs) ? current : latest;
+      });
+    }
+  }
 
   let html = '<div class="section">';
   html += '<div class="section-title">Today\'s Big 3<span class="section-title-bar"></span></div>';

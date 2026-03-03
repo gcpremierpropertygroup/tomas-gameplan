@@ -281,7 +281,7 @@ body{
 <div class="bottom-spacer"></div>
 
 <script>
-const SCRIPT_URL = localStorage.getItem('tg_parent_url') || 'https://script.google.com/macros/s/AKfycbzOF0xrvzhS-qkgv8sm-1HYz7acsFVbu2iawH3YrmrOaFN22oqlXlpbHmKc1xbqbOeZ/exec';
+const SCRIPT_URL = localStorage.getItem('tg_parent_url') || 'https://script.google.com/macros/s/AKfycbzkEYZsCZJqzBLmkLDEQI2iebLCmzIRM3wN_1xZKo4VaCt_y5JFRRSenkJa3l91fIrC/exec';
 
 function $(s){return document.querySelector(s)}
 
@@ -391,12 +391,15 @@ function renderCheckIn(checkIns) {
     const entryId = 'checkin-entry-' + idx;
     html += '<div style="margin-bottom:10px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">';
     // Header — always visible, click to expand/collapse older entries
-    html += '<div onclick="toggleCheckIn(\'' + entryId + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--s1);cursor:pointer;user-select:none">';
+    html += '<div style="display:flex;align-items:center;background:var(--s1)">';
+    html += '<div onclick="toggleCheckIn(\'' + entryId + '\')" style="flex:1;display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;user-select:none">';
     html += '<div>';
     html += '<div style="font-size:13px;font-weight:600;color:var(--text)">Week of ' + escHtml(String(ci.week)) + '</div>';
     if (ci.savedAt) html += '<div style="font-size:11px;color:var(--text3);margin-top:2px">Saved ' + formatTime(ci.savedAt) + '</div>';
     html += '</div>';
-    html += '<div id="' + entryId + '-arrow" style="font-size:11px;color:var(--text3);transition:transform .2s;' + (isFirst ? 'transform:rotate(180deg)' : '') + '">▼</div>';
+    html += '<div id="' + entryId + '-arrow" style="font-size:11px;color:var(--text3);transition:transform .2s;margin-right:10px;' + (isFirst ? 'transform:rotate(180deg)' : '') + '">▼</div>';
+    html += '</div>';
+    html += '<button onclick="deleteCheckIn(' + ci.rowIndex + ',this)" style="flex-shrink:0;width:36px;height:36px;margin-right:10px;border-radius:8px;border:1px solid rgba(255,71,87,.3);background:rgba(255,71,87,.08);color:#ff4757;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;line-height:1">×</button>';
     html += '</div>';
     // Body — open by default for the most recent
     html += '<div id="' + entryId + '" style="' + (isFirst ? '' : 'display:none;') + 'padding:14px;border-top:1px solid var(--border)">';
@@ -665,6 +668,23 @@ function showSetup() {
 function saveUrl() {
   const url = document.getElementById('urlInput').value.trim();
   if (url) { localStorage.setItem('tg_parent_url', url); location.reload(); }
+}
+
+async function deleteCheckIn(rowIndex, btn) {
+  if (!SCRIPT_URL) return;
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify({action: 'delete_checkin', rowIndex: rowIndex})
+    });
+    btn.closest('[style*="margin-bottom:10px"]').remove();
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '×';
+  }
 }
 
 async function deleteActivity(rowIndex, btn) {

@@ -597,25 +597,45 @@ function renderDashboard(data) {
   hw.filter(h => (h.status||'').toLowerCase() === 'done').forEach(h => activityDone.delete(h.name));
   done += activityDone.size;
 
+  const _af = window._hwFilter || 'all';
   let html = '';
 
-  // Stats
+  // Stats (clickable filters)
   html += '<div class="stats">';
-  html += '<div class="stat-card stat-overdue"><div class="stat-num">' + overdue + '</div><div class="stat-label">Overdue</div></div>';
-  html += '<div class="stat-card stat-pending"><div class="stat-num">' + pending + '</div><div class="stat-label">To Do</div></div>';
-  html += '<div class="stat-card stat-progress"><div class="stat-num">' + inProgress + '</div><div class="stat-label">Doing</div></div>';
-  html += '<div class="stat-card stat-done"><div class="stat-num">' + done + '</div><div class="stat-label">Done</div></div>';
+  html += '<div class="stat-card stat-overdue'+(_af==='overdue'?' stat-active':'')+'" onclick="setHWFilter('overdue')"><div class="stat-num">' + overdue + '</div><div class="stat-label">Overdue</div></div>';
+  html += '<div class="stat-card stat-pending'+(_af==='pending'?' stat-active':'')+'" onclick="setHWFilter('pending')"><div class="stat-num">' + pending + '</div><div class="stat-label">To Do</div></div>';
+  html += '<div class="stat-card stat-progress'+(_af==='doing'?' stat-active':'')+'" onclick="setHWFilter('doing')"><div class="stat-num">' + inProgress + '</div><div class="stat-label">Doing</div></div>';
+  html += '<div class="stat-card stat-done'+(_af==='done'?' stat-active':'')+'" onclick="setHWFilter('done')"><div class="stat-num">' + done + '</div><div class="stat-label">Done</div></div>';
   html += '</div>';
+
+  // Insight banner
+  html += renderInsightBanner(hw, today);
 
   // Today's Big 3
   html += renderBig3(dailyGoals);
   html += renderWeekScores(data.weeklyScores || []);
   html += renderCheckIn(data.checkIns || []);
 
+  // Recent activity inline
+  html += renderRecentActivity(activity);
+
+  // Apply filter
+  let hwView = hw;
+  if (_af === 'overdue') hwView = hw.filter(h => (h.status||'not-started') !== 'done' && h.due && h.due < today);
+  else if (_af === 'pending') hwView = hw.filter(h => ['not-started',''].includes((h.status||'not-started').toLowerCase()));
+  else if (_af === 'doing') hwView = hw.filter(h => (h.status||'not-started').toLowerCase() === 'in-progress');
+  else if (_af === 'done') hwView = hw.filter(h => (h.status||'not-started').toLowerCase() === 'done');
+
+  // Filter label
+  if (_af !== 'all') {
+    const filterLabels = {overdue:'Overdue', pending:'To Do', doing:'In Progress', done:'Completed'};
+    html += '<div style="padding:8px 16px 0"><span style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase">Showing: ' + filterLabels[_af] + ' · <span onclick="setHWFilter('all')" style="color:var(--blue);cursor:pointer;text-decoration:underline">Clear</span></span></div>';
+  }
+
   // Homework grouped by due date
-  if (hw.length > 0) {
+  if (hwView.length > 0) {
     const groups = {};
-    hw.forEach(h => {
+    hwView.forEach(h => {
       const key = h.due || 'no-date';
       if (!groups[key]) groups[key] = [];
       groups[key].push(h);
@@ -670,7 +690,7 @@ function renderDashboard(data) {
         html += '<div class="hw-card-body">';
         html += '<div class="hw-name' + (isDone ? ' done-name' : '') + '">' + escHtml(h.name||'Untitled') + '</div>';
         const tags = [];
-        if (h.subject) tags.push('<span class="hw-tag hw-tag-subject">' + escHtml(h.subject) + '</span>');
+        if (h.subject) tags.push('<span class="hw-tag hw-tag-subject ' + subjectColorClass(h.subject) + '">' + escHtml(h.subject) + '</span>');
         if (h.due) {
           const dueCls = info.cls === 'overdue' ? 'due-overdue' : (h.due === today ? 'due-today' : '');
           tags.push('<span class="hw-tag hw-tag-due ' + dueCls + '">📅 ' + formatDue(h.due) + '</span>');
@@ -873,6 +893,74 @@ function toggleCheckIn(id) {
   const isOpen = body.style.display !== 'none';
   body.style.display = isOpen ? 'none' : 'block';
   if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+window._hwFilter = 'all';
+
+function setHWFilter(filter) {
+  window._hwFilter = (window._hwFilter === filter) ? 'all' : filter;
+  if (window._lastData) renderDashboard(window._lastData);
+}
+
+function subjectColorClass(subject) {
+  if (!subject) return '';
+  const s = subject.toLowerCase().replace(/[^a-z]/g,'');
+  const map = {spanish:'subj-spanish',math:'subj-math',algebra:'subj-math',geometry:'subj-math',
+    history:'subj-history',socialstudies:'subj-history',
+    science:'subj-science',biology:'subj-science',chemistry:'subj-science',physics:'subj-science',
+    english:'subj-english',languagearts:'subj-english',ela:'subj-english',writing:'subj-english',literature:'subj-english',
+    pe:'subj-pe',gym:'subj-pe',physicaleducation:'subj-pe',
+    art:'subj-art',music:'subj-art',
+    reading:'subj-reading'};
+  return map[s] || '';
+}
+
+function renderInsightBanner(hw, today) {
+  const overdue = hw.filter(h => {
+    const s = (h.status||'not-started').toLowerCase();
+    return s !== 'done' && h.due && h.due < today;
+  });
+  const done = hw.filter(h => (h.status||'').toLowerCase() === 'done');
+  const active = hw.filter(h => (h.status||'').toLowerCase() === 'in-progress');
+
+  if (overdue.length === 0 && hw.length === 0) {
+    return '<div class="insight-banner ok"><span class="insight-icon">✓</span><span class="insight-text">No homework assigned right now.</span></div>';
+  }
+  if (overdue.length === 0 && done.length === hw.length && hw.length > 0) {
+    return '<div class="insight-banner ok"><span class="insight-icon">🎉</span><span class="insight-text"><strong>All caught up!</strong> Every assignment is done.</span></div>';
+  }
+  if (overdue.length > 0) {
+    const names = overdue.slice(0,2).map(h => '<strong>' + escHtml(h.name) + '</strong>').join(', ');
+    const more = overdue.length > 2 ? ' +' + (overdue.length-2) + ' more' : '';
+    return '<div class="insight-banner alert"><span class="insight-icon">⚠</span><span class="insight-text">' + overdue.length + ' item' + (overdue.length>1?'s are':' is') + ' overdue — ' + names + more + '</span></div>';
+  }
+  if (active.length > 0) {
+    return '<div class="insight-banner warn"><span class="insight-icon">⏳</span><span class="insight-text"><strong>' + active.length + ' in progress</strong> — Tomas is working on it.</span></div>';
+  }
+  return '<div class="insight-banner warn"><span class="insight-icon">📚</span><span class="insight-text"><strong>' + hw.length + ' assignment' + (hw.length>1?'s':'')+' pending.</strong> None started yet.</span></div>';
+}
+
+function renderRecentActivity(activity) {
+  const recent = (activity || []).filter(a => a.action !== 'big3_locked').slice(0,5);
+  let html = '<div class="section"><div class="section-title">Recent Activity<span class="section-title-bar"></span></div>';
+  html += '<div class="activity-feed-card">';
+  if (!recent.length) {
+    html += '<div class="feed-empty">No activity yet.</div>';
+  } else {
+    recent.forEach(a => {
+      const iconMap = {added:'＋',completed:'✓',deleted:'✕',status_change:'→'};
+      const iconCls = ['added','completed','deleted','status_change'].includes(a.action) ? a.action : 'other';
+      const icon = iconMap[a.action] || '•';
+      html += '<div class="activity-feed-row">';
+      html += '<div class="feed-icon ' + iconCls + '">' + icon + '</div>';
+      html += '<div class="feed-body">';
+      html += '<div class="feed-text">' + actionText(a) + '</div>';
+      html += '<div class="feed-time">' + formatTime(a.timestamp) + '</div>';
+      html += '</div></div>';
+    });
+  }
+  html += '</div></div>';
+  return html;
 }
 
 async function fetchData() {

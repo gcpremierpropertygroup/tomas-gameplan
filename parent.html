@@ -602,10 +602,10 @@ function renderDashboard(data) {
 
   // Stats (clickable filters)
   html += '<div class="stats">';
-  html += '<div class="stat-card stat-overdue'+(_af==='overdue'?' stat-active':'')+'" onclick="setHWFilter('overdue')"><div class="stat-num">' + overdue + '</div><div class="stat-label">Overdue</div></div>';
-  html += '<div class="stat-card stat-pending'+(_af==='pending'?' stat-active':'')+'" onclick="setHWFilter('pending')"><div class="stat-num">' + pending + '</div><div class="stat-label">To Do</div></div>';
-  html += '<div class="stat-card stat-progress'+(_af==='doing'?' stat-active':'')+'" onclick="setHWFilter('doing')"><div class="stat-num">' + inProgress + '</div><div class="stat-label">Doing</div></div>';
-  html += '<div class="stat-card stat-done'+(_af==='done'?' stat-active':'')+'" onclick="setHWFilter('done')"><div class="stat-num">' + done + '</div><div class="stat-label">Done</div></div>';
+  html += '<div class="stat-card stat-overdue'+(_af==='overdue'?' stat-active':'')+'" onclick="setHWFilter(\'overdue\')"><div class="stat-num">' + overdue + '</div><div class="stat-label">Overdue</div></div>';
+  html += '<div class="stat-card stat-pending'+(_af==='pending'?' stat-active':'')+'" onclick="setHWFilter(\'pending\')"><div class="stat-num">' + pending + '</div><div class="stat-label">To Do</div></div>';
+  html += '<div class="stat-card stat-progress'+(_af==='doing'?' stat-active':'')+'" onclick="setHWFilter(\'doing\')"><div class="stat-num">' + inProgress + '</div><div class="stat-label">Doing</div></div>';
+  html += '<div class="stat-card stat-done'+(_af==='done'?' stat-active':'')+'" onclick="setHWFilter(\'done\')"><div class="stat-num">' + done + '</div><div class="stat-label">Done</div></div>';
   html += '</div>';
 
   // Insight banner
@@ -629,7 +629,7 @@ function renderDashboard(data) {
   // Filter label
   if (_af !== 'all') {
     const filterLabels = {overdue:'Overdue', pending:'To Do', doing:'In Progress', done:'Completed'};
-    html += '<div style="padding:8px 16px 0"><span style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase">Showing: ' + filterLabels[_af] + ' · <span onclick="setHWFilter('all')" style="color:var(--blue);cursor:pointer;text-decoration:underline">Clear</span></span></div>';
+    html += '<div style="padding:8px 16px 0"><span style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase">Showing: ' + filterLabels[_af] + ' · <span onclick="setHWFilter(\'all\')" style="color:var(--blue);cursor:pointer;text-decoration:underline">Clear</span></span></div>';
   }
 
   // Homework grouped by due date

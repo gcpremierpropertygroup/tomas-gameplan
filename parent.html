@@ -143,6 +143,15 @@ body{
 .hw-name{font-size:14px;font-weight:500;line-height:1.3;color:var(--text)}
 .hw-name.done-name{text-decoration:line-through;color:var(--text3)}
 .hw-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.hw-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.hw-tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;line-height:1.5;letter-spacing:.01em}
+.hw-tag-subject{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.hw-tag-due{background:rgba(255,255,255,.05);color:var(--text2);border:1px solid var(--border2)}
+.hw-tag-due.due-overdue{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.hw-tag-due.due-today{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.hw-tag-p1{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.hw-tag-p2{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.hw-tag-p3{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
 .hw-badge{
   font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
   padding:3px 8px;border-radius:5px;white-space:nowrap;flex-shrink:0;
@@ -617,8 +626,14 @@ function renderDashboard(data) {
         html += '<div class="hw-status-dot ' + info.cls + '"></div>';
         html += '<div class="hw-card-body">';
         html += '<div class="hw-name' + (isDone ? ' done-name' : '') + '">' + escHtml(h.name||'Untitled') + '</div>';
-        const meta = [h.subject ? escHtml(h.subject) : '', h.priority ? 'P' + escHtml(h.priority) : ''].filter(Boolean).join(' · ');
-        if (meta) html += '<div class="hw-meta">' + meta + '</div>';
+        const tags = [];
+        if (h.subject) tags.push('<span class="hw-tag hw-tag-subject">' + escHtml(h.subject) + '</span>');
+        if (h.due) {
+          const dueCls = info.cls === 'overdue' ? 'due-overdue' : (h.due === today ? 'due-today' : '');
+          tags.push('<span class="hw-tag hw-tag-due ' + dueCls + '">📅 ' + formatDue(h.due) + '</span>');
+        }
+        if (h.priority) tags.push('<span class="hw-tag hw-tag-p' + escHtml(String(h.priority)) + '">P' + escHtml(String(h.priority)) + '</span>');
+        if (tags.length) html += '<div class="hw-tags">' + tags.join('') + '</div>';
         html += '</div>';
         html += '<span class="hw-badge ' + info.badgeCls + '">' + info.badge + '</span>';
         html += '</div>';

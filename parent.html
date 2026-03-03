@@ -71,13 +71,22 @@ body{
 }
 .stat-card{
   background:var(--bg);padding:16px 12px;text-align:center;
+  cursor:default;transition:background .2s,transform .15s;
+  position:relative;overflow:hidden;
 }
-.stat-num{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.stat-card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:currentColor;opacity:0;transition:opacity .2s;
+}
+.stat-card:hover{background:var(--s1)}
+.stat-card:hover::after{opacity:.4}
+.stat-num{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1;transition:transform .2s}
+.stat-card:hover .stat-num{transform:scale(1.08)}
 .stat-label{font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-top:5px}
-.stat-overdue .stat-num{color:var(--red)}
-.stat-pending .stat-num{color:var(--amber)}
-.stat-progress .stat-num{color:var(--blue)}
-.stat-done .stat-num{color:var(--green)}
+.stat-overdue{color:var(--red)}.stat-overdue .stat-num{color:var(--red)}
+.stat-pending{color:var(--amber)}.stat-pending .stat-num{color:var(--amber)}
+.stat-progress{color:var(--blue)}.stat-progress .stat-num{color:var(--blue)}
+.stat-done{color:var(--green)}.stat-done .stat-num{color:var(--green)}
 
 /* ── Sections ── */
 .section{padding:0 16px;margin-bottom:24px}
@@ -553,6 +562,14 @@ function renderDashboard(data) {
     if (s === 'in-progress') inProgress++; else pending++;
     if (h.due && h.due < today) overdue++;
   });
+  // Also count completions logged in activity (covers items completed then removed from sheet)
+  const activityDone = new Set();
+  (data.activity || []).forEach(a => {
+    if (a.action === 'completed' && a.name) activityDone.add(a.name);
+  });
+  // Subtract any that are still in hw as done (already counted above)
+  hw.filter(h => (h.status||'').toLowerCase() === 'done').forEach(h => activityDone.delete(h.name));
+  done += activityDone.size;
 
   let html = '';
 

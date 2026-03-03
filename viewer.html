@@ -391,7 +391,7 @@ function renderCheckIn(checkIns) {
     html += '<div style="font-size:13px;font-weight:600;color:var(--text)">Week of ' + escHtml(String(ci.week)) + '</div>';
     if (ci.savedAt) html += '<div style="font-size:11px;color:var(--text3);margin-top:2px">Saved ' + formatTime(ci.savedAt) + '</div>';
     html += '</div>';
-    html += '<div id="' + entryId + '-arrow" style="font-size:18px;color:var(--text3);transition:transform .2s;' + (isFirst ? 'transform:rotate(180deg)' : '') + '">▼</div>';
+    html += '<div id="' + entryId + '-arrow" style="font-size:28px;color:var(--text3);transition:transform .2s;' + (isFirst ? 'transform:rotate(180deg)' : '') + '">▼</div>';
     html += '</div>';
     html += '<div id="' + entryId + '" style="' + (isFirst ? '' : 'display:none;') + 'padding:14px;border-top:1px solid var(--border)">';
     let hasAny = false;

@@ -883,7 +883,20 @@ async function fetchData() {
   $('#syncText').textContent = 'Syncing...';
 
   try {
-    const resp = await fetch(SCRIPT_URL);
+    const cacheBust = SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + '_t=' + Date.now();
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    let resp;
+    try {
+      resp = await fetch(cacheBust, {
+        method: 'GET',
+        redirect: 'follow',
+        cache: 'no-store',
+        signal: controller.signal
+      });
+    } finally {
+      clearTimeout(timer);
+    }
     const data = await resp.json();
     window._lastData = data;
     if (data.status === 'ok') {

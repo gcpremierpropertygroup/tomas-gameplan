@@ -120,6 +120,36 @@ body{
 .stat-done .stat-num{color:var(--green)}
 .stat-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-top:7px}
 
+
+/* ── Insight Banner ── */
+.insight-banner{
+  margin:10px 16px 0;
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px 12px 13px;
+  border-radius:var(--radius);
+  border-left:3px solid;
+  animation:fadeInUp .3s ease both;
+  font-size:13.5px;font-weight:500;line-height:1.4;
+}
+.insight-banner.alert{
+  background:linear-gradient(90deg,rgba(227,179,65,.1) 0%,rgba(227,179,65,.03) 100%);
+  border-left-color:var(--amber);
+  color:var(--amber);
+}
+.insight-banner.warn{
+  background:linear-gradient(90deg,rgba(88,166,255,.07) 0%,rgba(88,166,255,.02) 100%);
+  border-left-color:var(--blue);
+  color:var(--blue);
+}
+.insight-banner.ok{
+  background:linear-gradient(90deg,rgba(63,185,80,.07) 0%,rgba(63,185,80,.02) 100%);
+  border-left-color:var(--green);
+  color:var(--green);
+}
+.insight-icon{font-size:20px;flex-shrink:0;line-height:1}
+.insight-text{flex:1}
+.insight-text strong{font-weight:700;color:inherit}
+
 /* ── Sections ── */
 @keyframes fadeInUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .section{padding:0 16px;margin-bottom:24px;animation:fadeInUp .35s ease both}
@@ -1052,9 +1082,9 @@ function renderInsightBanner(hw, today) {
     return '<div class="insight-banner ok"><span class="insight-icon">🎉</span><span class="insight-text"><strong>All caught up!</strong> Every assignment is done.</span></div>';
   }
   if (overdue.length > 0) {
-    const names = overdue.slice(0,2).map(h => '<span style="font-weight:700;color:var(--red)">' + escHtml(h.name) + '</span>').join(', ');
+    const names = overdue.slice(0,2).map(h => '<strong>' + escHtml(h.name) + '</strong>').join(', ');
     const more = overdue.length > 2 ? ' +' + (overdue.length-2) + ' more' : '';
-    return '<div class="insight-banner alert"><span class="insight-icon">⚠</span><span class="insight-text">' + overdue.length + ' item' + (overdue.length>1?'s are':' is') + ' overdue — ' + names + more + '</span></div>';
+    return '<div class="insight-banner alert"><span class="insight-icon">⚠️</span><span class="insight-text">' + overdue.length + ' item' + (overdue.length>1?'s are':' is') + ' overdue — ' + names + more + '</span></div>';
   }
   if (active.length > 0) {
     return '<div class="insight-banner warn"><span class="insight-icon">⏳</span><span class="insight-text"><strong>' + active.length + ' in progress</strong> — Tomas is working on it.</span></div>';

@@ -247,9 +247,52 @@ body{
 .drawer-close:active{background:var(--s3)}
 
 @media(max-width:400px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ── History Panel ── */
+#history-panel{position:fixed;inset:0;background:var(--bg);z-index:9000;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+#history-panel.open{transform:translateY(0)}
+#history-header{display:flex;align-items:center;justify-content:space-between;padding:20px 16px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+#history-title{font-size:16px;font-weight:700;letter-spacing:-.01em}
+#history-close{background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;padding:2px 6px}
+#history-tabs{display:flex;gap:6px;padding:12px 16px;overflow-x:auto;border-bottom:1px solid var(--border);flex-shrink:0;scrollbar-width:none}
+#history-tabs::-webkit-scrollbar{display:none}
+.htab{padding:6px 13px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s,color .15s}
+.htab.active{background:var(--s3);color:var(--text);border-color:var(--border2)}
+#history-body{flex:1;overflow-y:auto;padding:0 16px 24px}
+.hlog-day{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.hlog-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.hlog-item:last-child{border-bottom:none}
+.hlog-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.hlog-dot.added{background:var(--green)}
+.hlog-dot.completed{background:var(--blue)}
+.hlog-dot.deleted{background:var(--red)}
+.hlog-dot.status_change{background:var(--amber)}
+.hlog-dot.check_in{background:#a78bfa}
+.hlog-dot.cancelled{background:var(--red)}
+.hlog-dot.other{background:var(--text3)}
+.hlog-text{font-size:13px;color:var(--text2);line-height:1.4;flex:1}
+.hlog-text strong{color:var(--text);font-weight:600}
+.hlog-time{font-size:11px;color:var(--text3);margin-top:2px}
+.hlog-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px}
 </style>
 </head>
 <body>
+
+<div id="history-panel">
+  <div id="history-header">
+    <div id="history-title">Activity History</div>
+    <button id="history-close" onclick="closeHistory()">×</button>
+  </div>
+  <div id="history-tabs">
+    <button class="htab active" onclick="setHistoryTab('all',this)">All</button>
+    <button class="htab" onclick="setHistoryTab('homework',this)">Homework</button>
+    <button class="htab" onclick="setHistoryTab('checkin',this)">Check-Ins</button>
+    <button class="htab" onclick="setHistoryTab('goals',this)">Daily Goals</button>
+    <button class="htab" onclick="setHistoryTab('cancelled',this)">Cancelled</button>
+    <button class="htab" onclick="setHistoryTab('deleted',this)">Deleted</button>
+  </div>
+  <div id="history-body"></div>
+</div>
 
 <div class="header">
   <div class="header-left">
@@ -259,6 +302,7 @@ body{
       <div class="header-sub">Family view</div>
     </div>
   </div>
+  <button onclick="openHistory()" style="padding:6px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;" title="View history">📋 Log</button>
 </div>
 
 <div class="sync-bar">
@@ -596,6 +640,123 @@ function renderDashboard(data) {
   $('#app').innerHTML = html;
 }
 
+// ── History / Log Panel ─────────────────────────────────────
+var _historyTab = 'all';
+function openHistory() {
+  document.getElementById('history-panel').classList.add('open');
+  renderHistory(_historyTab);
+}
+function closeHistory() {
+  document.getElementById('history-panel').classList.remove('open');
+}
+function setHistoryTab(tab, btn) {
+  _historyTab = tab;
+  document.querySelectorAll('.htab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory(tab);
+}
+function renderHistory(tab) {
+  const body = document.getElementById('history-body');
+  if (!body) return;
+  const d = window._lastData;
+  if (!d) { body.innerHTML = '<div class="hlog-empty">No data loaded yet.</div>'; return; }
+
+  let entries = [];
+
+  // Activity log
+  (d.activity || []).forEach(a => {
+    entries.push({
+      ts: a.timestamp,
+      type: a.action || 'other',
+      label: actionText(a),
+      sub: a.subject || '',
+      category: a.action === 'check_in' ? 'checkin' : a.action === 'deleted' ? 'deleted' : 'homework'
+    });
+  });
+
+  // Check-ins (if not already in activity log)
+  (d.checkIns || []).forEach(ci => {
+    if (!(d.activity || []).some(a => a.action === 'check_in' && String(a.name).includes(ci.week))) {
+      entries.push({
+        ts: ci.savedAt || ci.week,
+        type: 'check_in',
+        label: 'Sunday Check-In saved — <strong>Week of ' + escHtml(String(ci.week)) + '</strong>',
+        sub: '',
+        category: 'checkin'
+      });
+    }
+  });
+
+  // Daily goals
+  (d.dailyGoals || []).forEach(g => {
+    const goals = [g.goal1, g.goal2, g.goal3].filter(Boolean);
+    if (goals.length) {
+      const done = [g.done1, g.done2, g.done3].filter(Boolean).length;
+      entries.push({
+        ts: g.syncedAt || g.date,
+        type: 'other',
+        label: 'Big 3 set — <strong>' + done + '/' + goals.length + ' completed</strong>: ' + goals.map(x => escHtml(x)).join(', '),
+        sub: '',
+        category: 'goals'
+      });
+    }
+  });
+
+  // Cancelled HW
+  (d.cancelled || []).forEach(c => {
+    entries.push({
+      ts: c.timestamp,
+      type: 'cancelled',
+      label: '<strong>' + escHtml(c.name || 'Untitled') + '</strong> cancelled' + (c.reason ? ' — ' + escHtml(c.reason) : ''),
+      sub: c.subject || '',
+      category: 'cancelled'
+    });
+  });
+
+  // Filter by tab
+  if (tab !== 'all') {
+    entries = entries.filter(e => e.category === tab);
+  }
+
+  // Sort newest first
+  entries.sort((a, b) => {
+    const ta = a.ts ? new Date(a.ts).getTime() : 0;
+    const tb = b.ts ? new Date(b.ts).getTime() : 0;
+    return tb - ta;
+  });
+
+  if (!entries.length) {
+    body.innerHTML = '<div class="hlog-empty">Nothing here yet.</div>';
+    return;
+  }
+
+  // Group by date
+  const groups = {};
+  entries.forEach(e => {
+    const d2 = e.ts ? new Date(e.ts) : null;
+    const key = d2 && !isNaN(d2) ? d2.toLocaleDateString('en-US', {weekday:'short',month:'short',day:'numeric',year:'numeric'}) : 'Unknown date';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(e);
+  });
+
+  let html = '';
+  Object.keys(groups).forEach(day => {
+    html += '<div class="hlog-day">' + day + '</div>';
+    groups[day].forEach(e => {
+      const dotCls = e.type === 'check_in' ? 'check_in' : e.type === 'cancelled' ? 'cancelled' : (e.type || 'other');
+      html += '<div class="hlog-item">';
+      html += '<div class="hlog-dot ' + dotCls + '"></div>';
+      html += '<div style="flex:1;min-width:0">';
+      html += '<div class="hlog-text">' + e.label + (e.sub ? ' <span style="color:var(--text3)">· ' + escHtml(e.sub) + '</span>' : '') + '</div>';
+      if (e.ts) html += '<div class="hlog-time">' + formatTime(e.ts) + '</div>';
+      html += '</div></div>';
+    });
+  });
+
+  body.innerHTML = html;
+}
+// ───────────────────────────────────────────────────────────
+
 function toggleCheckIn(id) {
   const body = document.getElementById(id);
   const arrow = document.getElementById(id + '-arrow');
@@ -613,6 +774,7 @@ async function fetchData() {
   try {
     const resp = await fetch(SCRIPT_URL);
     const data = await resp.json();
+    window._lastData = data;
     if (data.status === 'ok') {
       renderDashboard(data);
       dot.className = 'sync-dot';

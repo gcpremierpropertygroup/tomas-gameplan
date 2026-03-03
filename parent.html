@@ -1052,7 +1052,7 @@ function renderInsightBanner(hw, today) {
     return '<div class="insight-banner ok"><span class="insight-icon">🎉</span><span class="insight-text"><strong>All caught up!</strong> Every assignment is done.</span></div>';
   }
   if (overdue.length > 0) {
-    const names = overdue.slice(0,2).map(h => '<strong>' + escHtml(h.name) + '</strong>').join(', ');
+    const names = overdue.slice(0,2).map(h => '<b style="color:inherit;font-weight:700">' + escHtml(h.name) + '</b>').join(', ');
     const more = overdue.length > 2 ? ' +' + (overdue.length-2) + ' more' : '';
     return '<div class="insight-banner alert"><span class="insight-icon">⚠</span><span class="insight-text">' + overdue.length + ' item' + (overdue.length>1?'s are':' is') + ' overdue — ' + names + more + '</span></div>';
   }

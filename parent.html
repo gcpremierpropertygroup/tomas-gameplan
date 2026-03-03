@@ -741,7 +741,7 @@ function renderDashboard(data) {
       return a < b ? -1 : 1;
     });
 
-    html += '<div class="section">';
+    html += '<div class="section" id="hw-section">';
     html += '<div class="section-title">📚 Homework<span class="section-title-bar"></span></div>';
 
     sortedKeys.forEach(key => {
@@ -994,7 +994,15 @@ window._hwFilter = 'all';
 
 function setHWFilter(filter) {
   window._hwFilter = (window._hwFilter === filter) ? 'all' : filter;
-  if (window._lastData) renderDashboard(window._lastData);
+  if (window._lastData) {
+    renderDashboard(window._lastData);
+    if (window._hwFilter !== 'all') {
+      setTimeout(() => {
+        const el = document.getElementById('hw-section');
+        if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+      }, 60);
+    }
+  }
 }
 
 function subjectColorClass(subject) {

@@ -71,7 +71,13 @@ body{
 }
 .stat-card{
   background:var(--bg);padding:16px 12px;text-align:center;
+  cursor:pointer;transition:background .15s,box-shadow .15s;user-select:none;
 }
+.stat-card:hover{background:rgba(255,255,255,.03)}
+.stat-card.stat-active.stat-overdue{background:rgba(239,68,68,.08);box-shadow:inset 0 -2px 0 var(--red)}
+.stat-card.stat-active.stat-pending{background:rgba(245,158,11,.08);box-shadow:inset 0 -2px 0 var(--amber)}
+.stat-card.stat-active.stat-progress{background:rgba(59,130,246,.08);box-shadow:inset 0 -2px 0 var(--blue)}
+.stat-card.stat-active.stat-done{background:rgba(16,185,129,.08);box-shadow:inset 0 -2px 0 var(--green)}
 .stat-num{font-size:26px;font-weight:700;letter-spacing:-.03em;line-height:1}
 .stat-label{font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-top:5px}
 .stat-overdue .stat-num{color:var(--red)}
@@ -433,21 +439,20 @@ function renderCheckIn(checkIns) {
     html += '<div onclick="toggleCheckIn(\'' + entryId + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--s1);cursor:pointer;user-select:none">';
     html += '<div>';
     html += '<div style="font-size:13px;font-weight:600;color:var(--text)">Week of ' + escHtml(String(ci.week)) + '</div>';
-    if (ci.savedAt) html += '<div style="font-size:11px;color:var(--text3);margin-top:2px">Saved ' + formatTime(ci.savedAt) + '</div>';
+    if (ci.savedAt) html += '<div style="font-size:11px;color:var(--text3);margin-top:2px">Saved ' + formatTime(ci.savedAt) + '</div>'
     html += '</div>';
-    html += '<div id="' + entryId + '-arrow" style="font-size:28px;color:var(--text3);transition:transform .2s;' + (isFirst ? 'transform:rotate(180deg)' : '') + '">▼</div>';
+    html += '<div style="font-size:14px;color:var(--text3);padding:4px0;border:1px solid var(--s2);background:var(--s2);border-radius:4px">' + (isFirst ? '◈◉' : '◉'◈') + '</div>';
     html += '</div>';
-    html += '<div id="' + entryId + '" style="' + (isFirst ? '' : 'display:none;') + 'padding:14px;border-top:1px solid var(--border)">';
-    let hasAny = false;
-    qs.forEach(function(q) {
-      if (!ci[q.key]) return;
-      hasAny = true;
-      html += '<div style="margin-bottom:12px">';
-      html += '<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">' + escHtml(q.label) + '</div>';
-      html += '<div style="font-size:13px;color:var(--text);line-height:1.6;padding:10px 12px;background:var(--s2);border-radius:8px;border:1px solid var(--border)">' + escHtml(String(ci[q.key])) + '</div>';
+    const bodyId = 'checkin-body-' + idx;
+    html += '<div id="' + bodyId + '" style="display:' + (isFirst ? 'block' : 'none') + ';padding:12px 14px;background:var(--bg)">';
+    qs.forEach(q => {
+      const val = ci[q.key];
+      if (!val) return;
+      html += '<div style="margin-bottom:10px">';
+      html += '<div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--text3);margin-bottom:4px">' + escHtml(q.label) + '</div>';
+      html += '<div style="font-size:13px;line-height:1.5;color:var(--text)">' + escHtml(val) + '</div>';
       html += '</div>';
     });
-    if (!hasAny) html += '<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px 0">No answers recorded</div>';
     html += '</div>';
     html += '</div>';
   });
@@ -455,78 +460,101 @@ function renderCheckIn(checkIns) {
   return html;
 }
 
-function renderWeekScores(weeklyScores) {
-  if (!weeklyScores || !weeklyScores.length) return '';
-  const ws = weeklyScores[0];
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const cats = ['big3','power','phone','hwin'];
-  const catLabels = ['Big 3','Power','Phone','HW'];
-  let total = 0;
-  days.forEach(function(d){ cats.forEach(function(c){ if(ws.days[d] && ws.days[d][c]) total++; }); });
-  const pct = Math.round(total/28*100);
-  const scoreColor = total>=20?'var(--green)':total>=14?'var(--amber)':'var(--red)';
-  let html = '<div class="section">';
-  html += '<div class="section-title">This Week\'s Scores<span class="section-title-bar"></span></div>';
-  html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:14px">';
-  html += '<span style="font-size:28px;font-weight:800;color:'+scoreColor+'">'+total+'</span>';
-  html += '<span style="font-size:13px;color:var(--text3)">/ 28 &nbsp;·&nbsp; '+pct+'%</span>';
-  html += '<span style="font-size:11px;color:var(--text3);margin-left:4px">Week of '+escHtml(String(ws.week))+'</span>';
-  html += '</div>';
-  html += '<div style="display:grid;grid-template-columns:36px repeat(4,1fr);gap:4px;margin-bottom:4px">';
-  html += '<div></div>';
-  catLabels.forEach(function(l){ html += '<div style="font-size:10px;font-weight:700;color:var(--text3);text-align:center;text-transform:uppercase;letter-spacing:.4px">'+l+'</div>'; });
-  html += '</div>';
-  days.forEach(function(d){
-    const dayTotal = cats.filter(function(c){ return ws.days[d] && ws.days[d][c]; }).length;
-    html += '<div style="display:grid;grid-template-columns:36px repeat(4,1fr);gap:4px;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)">';
-    html += '<div style="font-size:12px;font-weight:700;color:var(--text2)">'+d+'</div>';
-    cats.forEach(function(c){
-      const on = ws.days[d] && ws.days[d][c];
-      html += '<div style="display:flex;justify-content:center">';
-      html += '<div style="width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;'+(on?'background:rgba(61,184,122,.15);color:var(--green)':'background:var(--s2);color:var(--text3)')+'">'+( on?'✓':'·')+'</div>';
-      html += '</div>';
-    });
-    html += '</div>';
-  });
-  html += '</div>';
-  return html;
+function toggleCheckIn(entryId) {
+  const idx = entryId.split('-').pop();
+  const bodyId = 'checkin-body-' + idx;
+  const el = document.getElementById(bodyId);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
-function renderDashboard(data) {
-  const hw = data.homework || [];
-  const activity = (data.activity || []).filter(a => {
-    return a.action !== 'big3_locked';
-  });
-  const dailyGoals = data.dailyGoals || [];
+function renderHomework(hw.status) {
+  const maxTitleLen = 50;
+  const title = hw.title || 'Untitled';
+  const trunc = title.length > maxTitleLen ? title.slice(0,maxTitleLen) + '…' : title;
+  const si = getStatusInfo(hw);
+  const dueStr = formatDue(hw.due);
+  return `<div class="card hw-card ${si.cls}" data-id="${hw.id}">
+    <div class="card-head">
+      <div class="card-title">${escHtml(trunc)}</div>
+      <span class="badge ${si.badgeCls}">${si.badge}</span>
+    </div>
+    ${dueStr ? `<div class="due">📆${dueStr}</div>` : ''}
+    ${hw.notes ? `<div class="hw-notes">${escHtml(hw.notes)}</div>` : ''}
+  </div>`;
+}
 
+let _hwFilter = 'all';
+
+function setHWFilter(filter) {
+  _whFilter = filter;
+  const btns = document.querySelectorAll('.stat-card');
+  btns.forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+  renderApp(window._lastData);
+}
+
+function renderHWSection(hwList) {
+  if (!hwList || !hwList.length) return '<div class="section"><div class="section-title">Homework<span class="section-title-bar"></span></div><div class="empty-msg">No homework assigned yet</div></div>';
   const today = new Date().toISOString().slice(0,10);
-  let overdue=0, pending=0, inProgress=0, done=0;
-  hw.forEach(h => {
-    const s = (h.status||'not-started').toLowerCase();
-    if (s === 'done') { done++; return; }
-    if (s === 'in-progress') inProgress++; else pending++;
-    if (h.due && h.due < today) overdue++;
-  });
+  const overdue = hwList.filter(h => (h.status||'').toLowerCase() !== 'done' && (h.status||'').toLowerCase() !== 'in-progress' && h.due && h.due < today).length;
+  const todo = hwList.filter(h => (h.status||'').toLowerCase() !== 'done' && (h.status||'').toLowerCase() !== 'in-progress' && (!h.due || h.due >= today)).length;
+  const doing = hwList.filter(h => (h.status||'').toLowerCase() === 'in-progress').length;
+  const done = hwList.filter(h => (h.status||'').toLowerCase() === 'done').length;
 
-  let html = '';
+  let filtered;
+  if (_whFilter === 'overdue') filtered = hwList.filter(h => (h.status||'').toLowerCase() !== 'done' && (h.status||'').toLowerCase() !== 'in-progress' && h.due && h.due < today)
+  else if (_whFilter === 'todo') filtered = hwList.filter(h => (h.status||'').toLowerCase() !== 'done' && (h.status||'').toLowerCase() !== 'in-progress' && (!h.due || h.due >= today));
+  else if (_whFilter === 'doing') filtered = hwList.filter(h => (h.status||'').toLowerCase() === 'in-progress');
+  else if (_whFilter === 'done') filtered = hwList.filter(h => (h.status||'').toLowerCase() === 'done');
+  else filtered = hwList;
 
-  // Stats
-  html += '<div class="stats">';
-  html += '<div class="stat-card stat-overdue"><div class="stat-num">' + overdue + '</div><div class="stat-label">Overdue</div></div>';
-  html += '<div class="stat-card stat-pending"><div class="stat-num">' + pending + '</div><div class="stat-label">To Do</div></div>';
-  html += '<div class="stat-card stat-progress"><div class="stat-num">' + inProgress + '</div><div class="stat-label">Doing</div></div>';
-  html += '<div class="stat-card stat-done"><div class="stat-num">' + done + '</div><div class="stat-label">Done</div></div>';
+  let html = '<div class="section">';
+  html += '<div class="section-title">Homework<span class="section-title-bar"></span></div>';
+  html += '<div class="stats-row">';
+  html += `<div class="stat-card overdue${_whFilter==='overdue' ? ' active' :''}" data-filter="overdue" onclick="setHWFilter('overdue')"><div class="stat-num">${overdue}</div><div class="stat-label">Overdue</div></div>`;
+  html += `<div class="stat-card todo${_whFilter==='todo' ? ' active' :''}" data-filter="todo" onclick="setHWFilter('todo')"><div class="stat-num">${todo}</div><div class="stat-label">To Do</div></div>`;
+  html += `<div class="stat-card doing${_whFilter==='doing' ? ' active' :""}" data-filter="doing" onclick="setHWFilter('doing')"><div class="stat-num">${doing}</div><div class="stat-label">Doing</div></div>`;
+  html += `<div class="stat-card done${_whFilter==='done' ? ' active' :""}" data-filter="done" onclick="setHWFilter('done')"><div class="stat-num">${done}</div><div class="stat-label">Done</div></div>`;
   html += '</div>';
 
-  // Today's Big 3
-  html += renderBig3(dailyGoals);
-  html += renderWeekScores(data.weeklyScores || []);
-  html += renderCheckIn(data.checkIns || []);
+  if (filtered.length === 0) {
+    html += '<div class="empty-msg">No items in this category</div>';
+  } else {
+    filtered.forEach(hw => { html += renderHomework(hw); });
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function renderApp(data) {
+  if (!data) return;
+  window._lastData = data;
+  const app = document.getElementById('app');
+  if (!app) return;
+  let html = '';
+  html += renderBig3(data.dailyGoals);
+  html += renderCheckIn(data.checkIns);
+  html += renderHWSection(data.homework);
+  app.innerHTML = html;
+}
+
+actionfunction fetchData() {
+  const syncDot = document.getElementById('syncDot');
+  const syncText = document.getElementById('syncText');
+  if (syncDot) syncDot.style.backgroundColor = '#f59e0b';
+  if (syncText) syncText.textContent = 'Syncing...';
+
+  fetch(SCRIPT_URL)
+    .then(r => r.json())
+    .then(data => {
+      if (syncDot) syncDot.style.backgroundColor = '#10b981';
+      if (syncText) syncText.textContent = 'Saved ' + formatTime  else if (_af === 'done') hwView = hw.filter(h => (h.status||'not-started').toLowerCase() === 'done');
 
   // Homework grouped by due date
-  if (hw.length > 0) {
+  if (hwView.length > 0) {
     const groups = {};
-    hw.forEach(h => {
+    hwView.forEach(h => {
       const key = h.due || 'no-date';
       if (!groups[key]) groups[key] = [];
       groups[key].push(h);
@@ -755,6 +783,12 @@ function renderHistory(tab) {
 
   body.innerHTML = html;
 }
+// ── HW Filter ──────────────────────────────────────────────
+window._hwFilter = 'all';
+function setHWFilter(filter) {
+  window._hwFilter = (window._hwFilter === filter) ? 'all' : filter;
+  if (window._lastData) renderDashboard(window._lastData);
+}
 // ───────────────────────────────────────────────────────────
 
 function toggleCheckIn(id) {
@@ -826,7 +860,7 @@ fetchData();
       'done':        {bg:'var(--green-bg)', color:'var(--green)',   border:'var(--green-border)',  label:'Done'},
       'in progress': {bg:'var(--blue-bg)',  color:'var(--blue)',    border:'var(--blue-border)',   label:'In Progress'},
       'overdue':     {bg:'var(--red-bg)',   color:'var(--red)',     border:'var(--red-border)',    label:'Overdue'},
-      'to do':       {bg:'var(--amber-bg)', color:'var(--amber)',   border:'var(--amber-border)',  label:'To Do'},
+      'to do':       {bg:'var(--amber-bg)', color:'var(--amber)',   border:'var(--amber-border(',  label:'To Do'},
     };
     const statusKey = isOverdue ? 'overdue' : (hw.status||'to do').toLowerCase();
     const sc = statusMap[statusKey] || statusMap['to do'];

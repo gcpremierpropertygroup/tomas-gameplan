@@ -374,21 +374,37 @@ function renderBig3(dailyGoals) {
 
 function renderCheckIn(checkIns) {
   if (!checkIns || !checkIns.length) return '';
-  const ci = checkIns[0];
   const qs = [
-    {label:'What went well?', val:ci.q1},
-    {label:'Where did he get stuck?', val:ci.q2},
-    {label:'Biggest thing next week?', val:ci.q3},
-    {label:'One thing he\'ll change:', val:ci.q4}
+    {key:'q1', label:'What went well?'},
+    {key:'q2', label:'Where did he get stuck?'},
+    {key:'q3', label:'Biggest thing next week?'},
+    {key:'q4', label:'One thing he\'ll change:'}
   ];
   let html = '<div class="section">';
-  html += '<div class="section-title">Sunday Check-In<span class="section-title-bar"></span></div>';
-  html += '<div style="font-size:11px;color:var(--text3);margin-bottom:14px">Week of ' + escHtml(String(ci.week)) + (ci.savedAt ? ' &nbsp;·&nbsp; Saved ' + formatTime(ci.savedAt) : '') + '</div>';
-  qs.forEach(function(q) {
-    if (!q.val) return;
-    html += '<div style="margin-bottom:14px">';
-    html += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">' + escHtml(q.label) + '</div>';
-    html += '<div style="font-size:13px;color:var(--text);line-height:1.6;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">' + escHtml(String(q.val)) + '</div>';
+  html += '<div class="section-title">Sunday Check-Ins<span class="section-title-bar"></span><span style="font-size:10px;font-weight:600;color:var(--text3);background:var(--s2);border:1px solid var(--border2);border-radius:4px;padding:2px 7px">' + checkIns.length + '</span></div>';
+  checkIns.forEach(function(ci, idx) {
+    const isFirst = idx === 0;
+    const entryId = 'checkin-entry-' + idx;
+    html += '<div style="margin-bottom:10px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">';
+    html += '<div onclick="toggleCheckIn(\'' + entryId + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--s1);cursor:pointer;user-select:none">';
+    html += '<div>';
+    html += '<div style="font-size:13px;font-weight:600;color:var(--text)">Week of ' + escHtml(String(ci.week)) + '</div>';
+    if (ci.savedAt) html += '<div style="font-size:11px;color:var(--text3);margin-top:2px">Saved ' + formatTime(ci.savedAt) + '</div>';
+    html += '</div>';
+    html += '<div id="' + entryId + '-arrow" style="font-size:11px;color:var(--text3);transition:transform .2s;' + (isFirst ? 'transform:rotate(180deg)' : '') + '">▼</div>';
+    html += '</div>';
+    html += '<div id="' + entryId + '" style="' + (isFirst ? '' : 'display:none;') + 'padding:14px;border-top:1px solid var(--border)">';
+    let hasAny = false;
+    qs.forEach(function(q) {
+      if (!ci[q.key]) return;
+      hasAny = true;
+      html += '<div style="margin-bottom:12px">';
+      html += '<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">' + escHtml(q.label) + '</div>';
+      html += '<div style="font-size:13px;color:var(--text);line-height:1.6;padding:10px 12px;background:var(--s2);border-radius:8px;border:1px solid var(--border)">' + escHtml(String(ci[q.key])) + '</div>';
+      html += '</div>';
+    });
+    if (!hasAny) html += '<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px 0">No answers recorded</div>';
+    html += '</div>';
     html += '</div>';
   });
   html += '</div>';
@@ -578,6 +594,15 @@ function renderDashboard(data) {
   }
 
   $('#app').innerHTML = html;
+}
+
+function toggleCheckIn(id) {
+  const body = document.getElementById(id);
+  const arrow = document.getElementById(id + '-arrow');
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
 }
 
 async function fetchData() {

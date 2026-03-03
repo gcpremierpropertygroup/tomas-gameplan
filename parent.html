@@ -305,7 +305,7 @@ body{
 <div class="bottom-spacer"></div>
 
 <script>
-const SCRIPT_URL = localStorage.getItem('tg_parent_url') || 'https://script.google.com/macros/s/AKfycbzkEYZsCZJqzBLmkLDEQI2iebLCmzIRM3wN_1xZKo4VaCt_y5JFRRSenkJa3l91fIrC/exec';
+const SCRIPT_URL = localStorage.getItem('tg_parent_url') || 'https://script.google.com/macros/s/AKfycbz5559UWoVB7vrKnJe4ZqKvbtuLtlabmSQc5TotQexY_VOKgWHPlQMJTj_8L_e8bQdR/exec';
 
 function $(s){return document.querySelector(s)}
 
@@ -567,7 +567,8 @@ function renderDashboard(data) {
       dayItems.forEach(h => {
         const info = getStatusInfo(h);
         const isDone = info.cls === 'done';
-        html += '<div class="hw-card" onclick=\'openHWDrawer(' + JSON.stringify(h) + ')\'>';
+        html += '<div class="hw-card" style="display:flex;align-items:center;gap:0">';
+        html += '<div style="flex:1;display:flex;align-items:center;gap:8px;padding:11px 16px;cursor:pointer;min-width:0" onclick=\'openHWDrawer(' + JSON.stringify(h) + ')\'>';
         html += '<div class="hw-status-dot ' + info.cls + '"></div>';
         html += '<div class="hw-card-body">';
         html += '<div class="hw-name' + (isDone ? ' done-name' : '') + '">' + escHtml(h.name||'Untitled') + '</div>';
@@ -575,6 +576,8 @@ function renderDashboard(data) {
         if (meta) html += '<div class="hw-meta">' + meta + '</div>';
         html += '</div>';
         html += '<span class="hw-badge ' + info.badgeCls + '">' + info.badge + '</span>';
+        html += '</div>';
+        html += '<button onclick="deleteHomework(' + h.rowIndex + ',\'' + escHtml(h.name||'').replace(/'/g,"\\'") + '\',\'' + escHtml(h.subject||'') + '\',\'' + escHtml(h.due||'') + '\',\'' + escHtml(h.priority||'') + '\',this)" style="flex-shrink:0;width:36px;height:36px;margin-right:8px;border-radius:8px;border:1px solid rgba(255,71,87,.3);background:rgba(255,71,87,.08);color:#ff4757;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;line-height:1">×</button>';
         html += '</div>';
       });
 
@@ -756,6 +759,25 @@ async function deleteCancelled(rowIndex, btn) {
       method: 'POST', mode: 'no-cors',
       headers: {'Content-Type': 'text/plain'},
       body: JSON.stringify({action: 'delete_cancelled', rowIndex: rowIndex})
+    });
+    btn.closest('.hw-card').remove();
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '×';
+  }
+}
+
+async function deleteHomework(rowIndex, name, subject, due, priority, btn) {
+  if (!SCRIPT_URL) return;
+  const ok = await showConfirm('Delete "' + name + '"?', 'This homework entry will be permanently removed and logged.');
+  if (!ok) return;
+  btn.disabled = true;
+  btn.textContent = '…';
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain'},
+      body: JSON.stringify({action: 'delete_homework', rowIndex: rowIndex, name: name, subject: subject, due: due, priority: priority})
     });
     btn.closest('.hw-card').remove();
   } catch(e) {
